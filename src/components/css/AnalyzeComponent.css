@@ -1,0 +1,68 @@
+.analyze-container {
+  padding: 20px;
+}
+
+.analyze-container .card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.analyze-container .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 15px 20px;
+}
+
+.analyze-container .card-body {
+  padding: 20px;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+
+/* KPI cards */
+.analyze-container .card.bg-light {
+  transition: all 0.2s;
+  border-left: 4px solid #005a87;
+}
+
+.analyze-container .card.bg-light:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.analyze-container h3 {
+  font-weight: 600;
+  color: #343a40;
+}
+
+.analyze-container .text-success {
+  color: #28a745 !important;
+}
+
+.analyze-container .text-danger {
+  color: #dc3545 !important;
+}
+
+/* Form controls */
+.analyze-container select.form-select {
+  max-width: 200px;
+}
+
+/* Add some responsive adjustments */
+@media (max-width: 768px) {
+  .analyze-container .row {
+    margin-bottom: 10px;
+  }
+  
+  .analyze-container .col-md-4 {
+    margin-bottom: 15px;
+  }
+  
+  .chart-container {
+    height: 250px !important;
+  }
+}

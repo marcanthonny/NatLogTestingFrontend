@@ -1,0 +1,11 @@
+.undo-redo-controls {
+  display: flex;
+  align-items: center;
+}
+.undo-redo-controls button {
+  display: flex;
+  align-items: center;
+}
+.undo-redo-controls button i {
+  margin-right: 5px;
+}

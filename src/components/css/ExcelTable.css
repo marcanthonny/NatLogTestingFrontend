@@ -1,0 +1,40 @@
+.excel-table {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.excel-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.excel-table th,
+.excel-table td {
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  white-space: nowrap;
+  user-select: none;
+}
+.excel-table tbody tr {
+  cursor: pointer;
+}
+.excel-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+.excel-table tbody tr.table-primary:hover {
+  background-color: #cfe2ff;
+}
+.excel-table .form-check-input {
+  width: 1.2em;
+  height: 1.2em;
+  cursor: pointer;
+}
+.excel-table td span {
+  color: #6c757d;
+  font-size: 0.9em;
+}
+.excel-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

@@ -1,0 +1,16 @@
+.formula-builder-panel .card-header {
+  background-color: #005e32 !important;
+  color: white;
+}
+
+/* History Controls Panel */
+.history-controls-panel .card-header {
+  background-color: #00385e !important; /* Blue header */
+  color: white;
+}
+
+/* Column Formatter Panel */
+.column-formatter-panel .card-header {
+  background-color: #00385e !important; /* Blue header */
+  color: white;
+}

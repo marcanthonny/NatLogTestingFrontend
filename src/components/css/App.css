@@ -1,0 +1,63 @@
+/* App Layout Styles */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content-wrapper {
+  flex: 1;
+  margin-left: 250px; /* Match sidebar width */
+  padding: 0; /* Remove padding */
+  min-height: 100vh;
+  position: relative;
+  width: calc(100% - 250px); /* Ensure content doesn't overlap sidebar */
+}
+
+.main-content {
+  padding: 20px;
+}
+
+/* Global button styles */
+.btn-primary {
+  background-color: #005e32;
+  border-color: #005e32;
+}
+
+.btn-primary:hover {
+  background-color: #00451e;
+  border-color: #00451e;
+}
+
+.btn-outline-primary {
+  color: #005e32;
+  border-color: #005e32;
+}
+
+.btn-outline-primary:hover {
+  background-color: #005e32;
+  color: white;
+}
+
+.btn-info {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: white;
+}
+
+.btn-info:hover {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: rgb(61, 61, 61);
+}
+
+/* Success colors */
+.alert-success {
+  background-color: rgba(0, 94, 50, 0.15);
+  border-color: rgba(0, 94, 50, 0.3);
+  color: #005e32;
+}
+
+.badge.bg-success {
+  background-color: #005e32 !important;
+}

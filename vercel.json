@@ -1,0 +1,28 @@
+{
+  "name": "excel-automation-frontend",
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "build" }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "github": {
+    "enabled": true,
+    "silent": true
+  },
+  "env": {
+    "REACT_APP_API_URL": "@backend_url"
+  }
+}

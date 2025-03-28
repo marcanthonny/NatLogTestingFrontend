@@ -1,0 +1,106 @@
+.dashboard-container {
+  padding: 15px 0;
+}
+.dashboard-container .card-header {
+  font-weight: 500;
+}
+.dashboard-container .card-header.bg-primary {
+  background-color: #ffffff !important;
+}
+
+.dashboard-container .card-header.bg-info {
+  background-color: #ffffff !important;
+}
+.dashboard-container .table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.dashboard-container .table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 1;
+}
+.dashboard-container .text-success {
+  color: #005e32 !important;
+}
+.dashboard-container .text-warning {
+  color: #ffc107 !important;
+}
+.dashboard-container .text-danger {
+  color: #dc3545 !important;
+}
+
+.cms-dashboard-container {
+  padding: 15px 0;
+}
+.cms-dashboard-container .card-header {
+  font-weight: 500;
+}
+.cms-dashboard-container .card-header.bg-primary {
+  background-color: #ffffff !important;
+}
+.cms-dashboard-container .card-header.bg-info {
+  background-color: #ffffff !important;
+}
+.cms-dashboard-container .table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.cms-dashboard-container .table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 1;
+}
+.cms-dashboard-container .text-success {
+  color: #005e32 !important;
+}
+.cms-dashboard-container .text-warning {
+  color: #ffc107 !important;
+}
+.cms-dashboard-container .text-danger {
+  color: #dc3545 !important;
+}
+
+/* Export button styles */
+.export-buttons {
+  margin: 15px 0;
+}
+
+.export-buttons .btn-group {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove these styles if they exist:
+.export-buttons .btn-image
+.export-buttons .btn-pdf
+.print-only
+*/
+
+.export-buttons .btn {
+  transition: all 0.2s;
+}
+
+.export-buttons .btn i {
+  font-size: 1rem;
+}
+
+/* Print-friendly styles (for PDF export) */
+@media print {
+  .cms-dashboard-container {
+    padding: 0;
+    background-color: white;
+  }
+  
+  .export-buttons,
+  .btn-outline-primary {
+    display: none !important;
+  }
+  
+  .cms-dashboard-container .card {
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    page-break-inside: avoid;
+  }
+}

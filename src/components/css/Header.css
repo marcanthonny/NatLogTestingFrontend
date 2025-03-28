@@ -1,0 +1,66 @@
+.cms-header {
+  height: 60px;
+  background-color: white;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.cms-header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+.cms-header .breadcrumb {
+  margin: 0;
+  background-color: transparent;
+}
+.cms-header .user-menu {
+  display: flex;
+  align-items: center;
+}
+
+.app-header {
+  height: 60px;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #343a40;
+}
+.app-header .breadcrumb {
+  margin: 0;
+  background-color: transparent;
+}
+.app-header .user-menu {
+  display: flex;
+  align-items: center;
+}
+.app-header .data-info {
+  margin-top: 0.5rem;
+}
+.app-header .badge {
+  font-weight: normal;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #dee2e6;
+}
+.app-header .date-time {
+  font-size: 0.9rem;
+  color: #6c757d;
+  text-align: right;
+}

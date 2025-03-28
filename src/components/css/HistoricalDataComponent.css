@@ -1,0 +1,87 @@
+.historical-data-container {
+  padding: 20px;
+}
+
+.historical-data-container .card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.historical-data-container .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 15px 20px;
+}
+
+.historical-data-container .list-group-item.active {
+  background-color: #f0f7ff;
+  color: #212529;
+  border-color: #dee2e6;
+}
+
+.historical-data-container .list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.historical-data-container h4 {
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.historical-data-container h6 {
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.historical-data-container .badge {
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 0.35em 0.65em;
+}
+
+.historical-data-container .table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.historical-data-container .btn-outline-danger {
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+}
+
+.historical-data-container .btn-outline-danger:hover {
+  background-color: #f8d7da;
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+/* Add status indicator for snapshots */
+.snapshot-source-indicator {
+  font-size: 0.7rem;
+  border-radius: 3px;
+  padding: 2px 6px;
+  margin-right: 5px;
+}
+
+.snapshot-source-server {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.snapshot-source-local {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+/* Add a hint for offline mode */
+.offline-mode-alert {
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  background-color: #fff3cd;
+  color: #664d03;
+  border-left: 4px solid #ffc107;
+}
