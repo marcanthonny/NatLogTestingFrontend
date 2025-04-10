@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+/*import React, { useState } from 'react';
 import axios from 'axios';
 
 function FileUpload({ onUploadSuccess, onLoading, onError }) {
@@ -65,4 +65,4 @@ function FileUpload({ onUploadSuccess, onLoading, onError }) {
   );
 }
 
-export default FileUpload;
+export default FileUpload;*/

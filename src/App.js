@@ -10,7 +10,7 @@ import ToolBar from './components/ToolBar';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import UndoRedo from './components/UndoRedo';
-import IraCcDashboard from './components/IraCcDashboard';
+import IraCcDashboard from './interfaces/IraCcDashboard';
 import DataView from './components/DataView';
 import AnalyzeComponent from './components/AnalyzeComponent';
 import HistoricalDataComponent from './components/HistoricalDataComponent';

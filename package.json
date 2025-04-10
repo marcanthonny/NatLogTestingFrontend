@@ -6,6 +6,8 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^5.1.0",
     "axios": "^1.5.0",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.8",
@@ -19,6 +21,12 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-webpack-plugin": "^4.0.1",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-private-property-in-object": "^7.22.11"
   },
   "scripts": {
     "start": "react-scripts start",
