@@ -1,0 +1,41 @@
+.excel-editor {
+  padding: 20px;
+}
+
+.excel-uploader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.dropzone {
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dropzone:hover,
+.dropzone.active {
+  border-color: #005e32;
+  background-color: rgba(0, 94, 50, 0.05);
+}
+
+.dropzone i {
+  font-size: 48px;
+  color: #005e32;
+  margin-bottom: 16px;
+}
+
+.editor-container {
+  margin-top: 20px;
+}
+
+.editor-container > * {
+  margin-bottom: 20px;
+}

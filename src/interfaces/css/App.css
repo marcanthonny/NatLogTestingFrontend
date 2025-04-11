@@ -1,0 +1,128 @@
+/* App Layout Styles */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content-wrapper {
+  flex: 1;
+  margin-left: 250px; /* Match sidebar width */
+  padding: 0; /* Remove padding */
+  min-height: 100vh;
+  position: relative;
+  width: calc(100% - 250px); /* Ensure content doesn't overlap sidebar */
+  transition: margin-left 0.3s ease;
+}
+
+.main-content {
+  padding: 20px;
+}
+
+/* Global button styles */
+.btn-primary {
+  background-color: #005e32;
+  border-color: #005e32;
+}
+
+.btn-primary:hover {
+  background-color: #00451e;
+  border-color: #00451e;
+}
+
+.btn-outline-primary {
+  color: #005e32;
+  border-color: #005e32;
+}
+
+.btn-outline-primary:hover {
+  background-color: #005e32;
+  color: white;
+}
+
+.btn-info {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: white;
+}
+
+.btn-info:hover {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: rgb(61, 61, 61);
+}
+
+/* Success colors */
+.alert-success {
+  background-color: rgba(0, 94, 50, 0.15);
+  border-color: rgba(0, 94, 50, 0.3);
+  color: #005e32;
+}
+
+.badge.bg-success {
+  background-color: #005e32 !important;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .main-content-wrapper {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 60px;
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .header {
+    padding-left: 60px;
+  }
+}
+
+/* Make tables responsive */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Card adjustments for mobile */
+.card {
+  margin-bottom: 1rem;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+@media (max-width: 576px) {
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-group .btn {
+    margin-bottom: 0.5rem;
+    width: 100%;
+    border-radius: 4px !important;
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .dashboard-container {
+    padding: 10px;
+  }
+
+  .card {
+    margin-bottom: 15px;
+  }
+}

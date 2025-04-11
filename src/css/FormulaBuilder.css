@@ -1,0 +1,10 @@
+.formula-builder {
+  margin-bottom: 20px;
+}
+
+.formula-preview {
+  font-family: monospace;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}

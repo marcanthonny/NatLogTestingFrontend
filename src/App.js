@@ -1,24 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './components/css/App.css';
-import './components/css/Dashboard.css';
-import EnhancedFileUpload from './components/EnhancedFileUpload';
-import ExcelTable from './components/ExcelTable';
-import FormulaBuilder from './components/FormulaBuilder';
-import ColumnFormatter from './components/ColumnFormatter';
-import FilterPanel from './components/FilterPanel';
-import ToolBar from './components/ToolBar';
+import './interfaces/css/App.css';
+import './interfaces/css/Dashboard.css';
+import EnhancedFileUpload from './interfaces/IraCcComponents/EnhancedFileUpload';
+import ExcelTable from './mechanisms/Excel Editor/ExcelTable';
+import FormulaBuilder from './mechanisms/Excel Editor/FormulaBuilder';
+import ColumnFormatter from './mechanisms/Excel Editor/ColumnFormatter';
+import FilterPanel from './mechanisms/Excel Editor/FilterPanel';
+import ToolBar from './mechanisms/Excel Editor/ToolBar';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import UndoRedo from './components/UndoRedo';
-import IraCcDashboard from './interfaces/IraCcDashboard';
-import DataView from './components/DataView';
-import AnalyzeComponent from './components/AnalyzeComponent';
-import HistoricalDataComponent from './components/HistoricalDataComponent';
-import ComprehensiveDashboard from './components/ComprehensiveDashboard';
-import { LanguageProvider } from './context/LanguageContext';
+import UndoRedo from './interfaces/generals/UndoRedo';
+import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
+import DataView from './mechanisms/IRA CC/DataView';
+import AnalyzeComponent from './mechanisms/IRA CC/AnalyzeComponent';
+import HistoricalDataComponent from './mechanisms/IRA CC/HistoricalDataComponent';
+import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
+import { LanguageProvider } from './mechanisms/General/LanguageContext';
+import ExcelEditor from './interfaces/ExcelEditor/ExcelEditor';
 
 function App() {
-  // Separate states for IRA and CC data
+  // IRA CC states
   const [iraData, setIraData] = useState(null);
   const [ccData, setCcData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,33 @@ function App() {
 
   // Add new state for language
   const [language, setLanguage] = useState('en');
+
+  // Maintain excelData at App level
+  const [excelData, setExcelData] = useState(() => {
+    // Try to load from localStorage on initial mount
+    const stored = localStorage.getItem('excelData');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.error('Failed to parse stored Excel data:', e);
+      }
+    }
+    return null;
+  });
+
+  // Separate Excel Editor state
+  const [excelEditorData, setExcelEditorData] = useState(() => {
+    const stored = localStorage.getItem('excelEditorData');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.error('Failed to parse stored Excel Editor data:', e);
+      }
+    }
+    return null;
+  });
 
   // Add data to history when it changes
   useEffect(() => {
@@ -83,34 +111,52 @@ function App() {
     }
   }, [iraData, ccData]);
 
+  // Add effect to handle page reloads
+  useEffect(() => {
+    // Reset to upload tab when page is loaded/reloaded
+    setActiveTab('upload');
+    // Clear any stored data
+    clearExcelData();
+  }, []); // Empty dependency array means this runs once on mount
+
   const handleIraData = (data) => {
-    setIraData(data);
-    setIraHistory([]);
-    setIraHistoryIndex(-1);
+    // Ensure data is properly structured
+    const processedData = {
+      columns: data.columns || Object.keys(data.data?.[0] || {}),
+      data: data.data || [],
+      isPowerBi: data.isPowerBi,
+      fileName: data.fileName
+    };
+
+    setIraData(processedData);
     
-    // Check if this is PowerBI data and set flag accordingly
-    if (data.isPowerBi) {
+    if (processedData.isPowerBi) {
       setIraPowerBiUsed(true);
     }
     
     setLoading(false);
     setError(null);
-    setSuccess(null);
+    setSuccess('IRA data processed successfully');
   };
 
   const handleCcData = (data) => {
-    setCcData(data);
-    setCcHistory([]);
-    setCcHistoryIndex(-1);
+    // Ensure data is properly structured
+    const processedData = {
+      columns: data.columns || Object.keys(data.data?.[0] || {}),
+      data: data.data || [],
+      isPowerBi: data.isPowerBi,
+      fileName: data.fileName
+    };
+
+    setCcData(processedData);
     
-    // Check if this is PowerBI data and set flag accordingly
-    if (data.isPowerBi) {
+    if (processedData.isPowerBi) {
       setCcPowerBiUsed(true);
     }
     
     setLoading(false);
     setError(null);
-    setSuccess(null);
+    setSuccess('CC data processed successfully');
   };
 
   const handleLoading = (isLoading) => {
@@ -288,6 +334,36 @@ function App() {
     setLanguage(prev => prev === 'en' ? 'id' : 'en');
   };
 
+  // When uploading or editing the file, update excelData here
+  const handleExcelDataChange = (newData) => {
+    setExcelData(newData);
+    // Also save to localStorage
+    try {
+      localStorage.setItem('excelData', JSON.stringify(newData));
+    } catch (e) {
+      console.error('Failed to save Excel data:', e);
+    }
+  };
+
+  // Add separate handler for Excel Editor data changes
+  const handleExcelEditorDataChange = (newData) => {
+    setExcelEditorData(newData);
+    try {
+      localStorage.setItem('excelEditorData', JSON.stringify(newData));
+    } catch (e) {
+      console.error('Failed to save Excel Editor data:', e);
+    }
+  };
+
+  // Add Excel Editor to the available tabs
+  const tabs = [
+    { id: 'upload', label: 'Upload Files', icon: 'bi-cloud-upload' },
+    { id: 'data', label: 'Data View', icon: 'bi-table' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'bi-graph-up' },
+    { id: 'history', label: 'Historical Data', icon: 'bi-clock-history' },
+    { id: 'excelEditor', label: 'Excel Editor', icon: 'bi-file-earmark-spreadsheet' } // Add this line
+  ];
+
   // Render content based on the active tab
   const renderContent = () => {
     switch (activeTab) {
@@ -330,9 +406,29 @@ function App() {
         />;
       case 'comprehensive':
         return <ComprehensiveDashboard />;
+      case 'excelEditor':
+        return (
+          <ExcelEditor 
+            key="excelEditor"
+            initialData={excelEditorData} 
+            onDataChange={handleExcelEditorDataChange}
+          />
+        );
       default:
         return null;
     }
+  };
+
+  // Add a cleanup function for when you intentionally want to clear the Excel data
+  const clearExcelData = () => {
+    setExcelData(null);
+    localStorage.removeItem('excelData');
+  };
+
+  // Clear Excel Editor data
+  const clearExcelEditorData = () => {
+    setExcelEditorData(null);
+    localStorage.removeItem('excelEditorData');
   };
 
   return (
