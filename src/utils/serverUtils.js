@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 
 /**
  * Checks if the server API is available
@@ -6,9 +7,12 @@ import axios from 'axios';
  */
 export const isServerAvailable = async () => {
   try {
-    // Make a simple HEAD request to check if server is responding
-    await axios.head('/api/snapshots', { timeout: 2000 });
-    return true;
+    // Use 'snapshots' instead of '/api/snapshots'
+    const response = await axios.head(getApiUrl('/api/snapshots'), { 
+      timeout: 5000,
+      validateStatus: (status) => status === 200
+    });
+    return response.status === 200;
   } catch (error) {
     console.log('Server API check failed:', error.message);
     return false;

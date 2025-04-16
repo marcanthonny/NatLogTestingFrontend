@@ -5,13 +5,20 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
+      "config": {
+        "distDir": "build",
+        "zeroConfig": true
+      }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "https://aplnatlog-backend.vercel.app/api/$1"
     },
     {
       "src": "/(.*)",
@@ -23,6 +30,11 @@
     "silent": true
   },
   "env": {
-    "REACT_APP_API_URL": "@backend_url"
+    "REACT_APP_API_URL": "https://aplnatlog-backend.vercel.app"
+  },
+  "build": {
+    "env": {
+      "REACT_APP_API_URL": "https://aplnatlog-backend.vercel.app"
+    }
   }
 }

@@ -69,20 +69,52 @@ function ComprehensiveDashboard() {
     }
   };
 
-  // Load detailed data for each snapshot
+  // Update the loadDetailedSnapshots function to better handle snapshot data
   const loadDetailedSnapshots = async (snapshots) => {
     const detailedData = [];
     try {
       // Get the 12 most recent snapshots if there are more than 12
-      const recentSnapshots = snapshots.length > 12 ? snapshots.slice(-12) : snapshots;
+      const recentSnapshots = snapshots.slice(-12);
+      
       for (const snapshot of recentSnapshots) {
-        const response = await axios.get(`/api/snapshots/${snapshot.id}`);
-        detailedData.push(response.data);
+        try {
+          const response = await axios.get(`/api/snapshots/${snapshot.id}`);
+          // Transform simple percentages into stats structure if needed
+          const transformedData = {
+            ...response.data,
+            iraStats: response.data.iraStats || {
+              percentage: response.data.iraPercentage,
+              branchPercentages: [] // Add empty branch percentages if not available
+            },
+            ccStats: response.data.ccStats || {
+              percentage: response.data.ccPercentage,
+              branchPercentages: [] // Add empty branch percentages if not available
+            }
+          };
+          detailedData.push(transformedData);
+        } catch (err) {
+          // If detailed fetch fails, use the summary data
+          const transformedData = {
+            ...snapshot,
+            iraStats: {
+              percentage: snapshot.iraPercentage,
+              branchPercentages: []
+            },
+            ccStats: {
+              percentage: snapshot.ccPercentage,
+              branchPercentages: []
+            }
+          };
+          detailedData.push(transformedData);
+          console.warn(`Using summary data for snapshot ${snapshot.id}:`, err);
+        }
       }
       setDetailedSnapshots(detailedData);
     } catch (error) {
       console.error('Error loading detailed snapshots:', error);
       setError('Failed to load snapshot details. Some data may be incomplete.');
+      // Still set the data we have
+      setDetailedSnapshots(detailedData);
     }
   };
 
@@ -310,18 +342,17 @@ function ComprehensiveDashboard() {
   // Calculate growth indicators - UPDATED to handle branch selection
   const getGrowthIndicators = () => {
     if (detailedSnapshots.length < 2) {
-      return { weekly: 0, overall: 0 };
+      return { weekly: 0, overall: 0, lastWeekSnapshot: null, currentWeekSnapshot: null };
     }
 
-    // Get the two most recent snapshots
     const currentWeek = detailedSnapshots[detailedSnapshots.length - 1];
-
-    // Find the previous week's snapshot based on compare period
+    
+    // Calculate offset based on compare period
     const periodInDays = {
       '4': 28,
       '8': 56,
       '12': 84,
-      'all': null
+      'all': 7
     };
     const targetDate = new Date(currentWeek.date);
     targetDate.setDate(targetDate.getDate() - (periodInDays[comparePeriod] || 7));
@@ -335,9 +366,14 @@ function ComprehensiveDashboard() {
     
     if (selectedBranch === 'all') {
       // Use overall CC percentage
-      weeklyGrowth = currentWeek.ccStats.percentage - lastWeek.ccStats.percentage;
-      overallGrowth = currentWeek.ccStats.percentage - detailedSnapshots[0].ccStats.percentage;
+      const currentPercentage = currentWeek.ccStats?.percentage || currentWeek.ccPercentage || 0;
+      const lastWeekPercentage = lastWeek.ccStats?.percentage || lastWeek.ccPercentage || 0;
+      const firstWeekPercentage = detailedSnapshots[0].ccStats?.percentage || detailedSnapshots[0].ccPercentage || 0;
+      
+      weeklyGrowth = currentPercentage - lastWeekPercentage;
+      overallGrowth = currentPercentage - firstWeekPercentage;
     } else {
+      // Handle branch-specific calculations
       // Find branch-specific percentages
       const currentBranchData = currentWeek.ccStats.branchPercentages
         .find(b => b.branch === selectedBranch);
@@ -350,8 +386,8 @@ function ComprehensiveDashboard() {
     }
 
     return {
-      weekly: weeklyGrowth, 
-      overall: overallGrowth,
+      weekly: weeklyGrowth || 0, 
+      overall: overallGrowth || 0,
       lastWeekSnapshot: lastWeek,
       currentWeekSnapshot: currentWeek
     };
@@ -369,16 +405,14 @@ function ComprehensiveDashboard() {
 
     if (selectedBranch === 'all') {
       return {
-        lastWeek: lastWeek.ccStats.percentage,
-        currentWeek: currentWeek.ccStats.percentage
+        lastWeek: lastWeek.ccStats?.percentage || lastWeek.ccPercentage || 0,
+        currentWeek: currentWeek.ccStats?.percentage || currentWeek.ccPercentage || 0
       };
     }
     
     // Get branch-specific percentages
-    const lastWeekBranch = lastWeek.ccStats.branchPercentages
-      .find(b => b.branch === selectedBranch);
-    const currentWeekBranch = currentWeek.ccStats.branchPercentages
-      .find(b => b.branch === selectedBranch);
+    const lastWeekBranch = lastWeek.ccStats?.branchPercentages?.find(b => b.branch === selectedBranch);
+    const currentWeekBranch = currentWeek.ccStats?.branchPercentages?.find(b => b.branch === selectedBranch);
 
     return {
       lastWeek: lastWeekBranch?.percentage || 0,

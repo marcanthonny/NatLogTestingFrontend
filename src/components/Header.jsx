@@ -2,7 +2,7 @@ import React from 'react';
 import { useLanguage } from '../mechanisms/General/LanguageContext';
 import '../interfaces/css/Header.css';
 
-function Header({ activeTab, excelData }) {
+export const Header = ({ activeTab, excelData }) => {
   const { language, toggleLanguage } = useLanguage();
 
   // Get page title based on active tab
@@ -67,6 +67,7 @@ function Header({ activeTab, excelData }) {
       </div>
     </header>
   );
-}
+};
 
+// Can also use default export if preferred
 export default Header;

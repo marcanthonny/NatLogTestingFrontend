@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Nav, Tab } from 'react-bootstrap';
+import axios from 'axios';
 
 function WeekTargetConfiguration({ show, onHide, onUpdate }) {
   const [targets, setTargets] = useState({
@@ -18,20 +19,52 @@ function WeekTargetConfiguration({ show, onHide, onUpdate }) {
   });
   const [activeTab, setActiveTab] = useState('ira');
 
+  // Load configs from backend
   useEffect(() => {
-    const savedTargets = localStorage.getItem('weekTargetSettings');
-    if (savedTargets) {
+    const loadConfigs = async () => {
       try {
-        setTargets(JSON.parse(savedTargets));
-      } catch (e) {
-        console.error('Error parsing saved targets:', e);
+        const response = await axios.get('/api/week-config');
+        if (Object.keys(response.data).length > 0) {
+          setTargets(response.data);
+        }
+      } catch (error) {
+        console.error('Error loading week configurations:', error);
+        // Fallback to localStorage
+        const savedTargets = localStorage.getItem('weekTargetSettings');
+        if (savedTargets) {
+          try {
+            setTargets(JSON.parse(savedTargets));
+          } catch (e) {
+            console.error('Error parsing saved targets:', e);
+          }
+        }
       }
+    };
+
+    if (show) {
+      loadConfigs();
     }
   }, [show]);
 
-  const handleSave = () => {
-    onUpdate(targets);
-    onHide();
+  const handleSave = async () => {
+    try {
+      // Save to backend
+      await axios.post('/api/week-config', targets);
+      
+      // Keep localStorage as backup
+      localStorage.setItem('weekTargetSettings', JSON.stringify(targets));
+      
+      onUpdate(targets);
+      onHide();
+    } catch (error) {
+      console.error('Error saving week configurations:', error);
+      alert('Failed to save configurations to server. Changes saved locally only.');
+      
+      // Fallback to local save
+      localStorage.setItem('weekTargetSettings', JSON.stringify(targets));
+      onUpdate(targets);
+      onHide();
+    }
   };
 
   const handleChange = (type, week, field, value) => {

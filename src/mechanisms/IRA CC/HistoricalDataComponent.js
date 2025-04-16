@@ -3,6 +3,10 @@ import * as XLSX from 'xlsx';
 import axios from 'axios';
 import '../../interfaces/css/components/HistoricalDataComponent.css';
 import { getSnapshotStorageLocation, exportLocalSnapshots, importLocalSnapshots } from '../../utils/snapshotUtils';
+import { getApiUrl } from '../../config/api';
+
+// Configure axios base URL
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 const VALID_BRANCHES = [
   '1982 - PT. APL JAYAPURA',
@@ -77,45 +81,56 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     setError(null);
     
     try {
-      // Always try to load from server first - this is now the primary storage
-      const response = await axios.get('/api/snapshots');
-      
-      // Process snapshots to ensure they have the required percentage properties
-      const processedSnapshots = response.data.map(snapshot => {
-        return {
-          ...snapshot,
-          iraPercentage: snapshot.iraStats?.percentage || 
-                        (snapshot.iraPercentage !== undefined ? snapshot.iraPercentage : 0),
-          ccPercentage: snapshot.ccStats?.percentage || 
-                       (snapshot.ccPercentage !== undefined ? snapshot.ccPercentage : 0)
-        };
+      // Use full URL from config including /api prefix
+      const response = await axios.get('/api/snapshots', {
+        timeout: 5000,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
       
+      // Process response
+      const processedSnapshots = response.data.map(snapshot => ({
+        ...snapshot,
+        iraPercentage: snapshot.iraStats?.percentage || 
+          (snapshot.iraPercentage !== undefined ? snapshot.iraPercentage : 0),
+        ccPercentage: snapshot.ccStats?.percentage || 
+          (snapshot.ccPercentage !== undefined ? snapshot.ccPercentage : 0)
+      }));
+
       setWeeklySnapshots(processedSnapshots);
       console.log('Loaded snapshots from server:', processedSnapshots.length);
       
-      // Since we successfully loaded from server, save a copy to localStorage for offline access
+      // Save backup
       localStorage.setItem('weeklySnapshots_backup', JSON.stringify(processedSnapshots));
     } catch (error) {
-      console.log('Server API unavailable, checking for backup:', error);
-      // Only use localStorage as emergency backup if server is unavailable
-      try {
-        const localSnapshots = localStorage.getItem('weeklySnapshots_backup');
-        if (localSnapshots) {
-          const parsedSnapshots = JSON.parse(localSnapshots);
-          setWeeklySnapshots(parsedSnapshots);
-          console.log('Loaded snapshots from backup:', parsedSnapshots.length);
-          setError('Server unavailable. Showing backup data which may not be current.');
-        } else {
-          setWeeklySnapshots([]);
-          setError('Server unavailable and no backup data found.');
-        }
-      } catch (localError) {
-        console.error('Error loading from backup:', localError);
-        setError('Failed to load snapshots. Server is unavailable and backup could not be accessed.');
-      }
+      console.error('Server request failed:', error);
+      handleServerError(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleServerError = (error) => {
+    const errorMessage = error.response?.data?.message || error.message;
+    console.log('Detailed error:', error);
+    setError(`Failed to connect to server: ${errorMessage}. Using local backup if available.`);
+    
+    // Try loading from backup
+    try {
+      const backup = localStorage.getItem('weeklySnapshots_backup');
+      if (backup) {
+        const parsedBackup = JSON.parse(backup);
+        setWeeklySnapshots(parsedBackup);
+        setError('Server unavailable. Showing backup data which may not be current.');
+      } else {
+        setWeeklySnapshots([]);
+        setError('Server unavailable and no backup data found.');
+      }
+    } catch (localError) {
+      console.error('Backup loading failed:', localError);
+      setError('Server unavailable and backup could not be accessed.');
     }
   };
   
@@ -126,10 +141,30 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     
     try {
       const response = await axios.get(`/api/snapshots/${id}`);
+      if (!response.data) {
+        throw new Error('Empty response received');
+      }
       setSelectedSnapshot(response.data);
     } catch (error) {
       console.error('Error fetching snapshot details:', error);
-      setError('Failed to fetch snapshot details. Please try again.');
+      const errorMessage = error.response?.data?.details || error.message;
+      setError(`Failed to fetch snapshot data (ID: ${id}). ${errorMessage}`);
+      
+      // Attempt to load from localStorage as fallback
+      const localData = localStorage.getItem('weeklySnapshots');
+      if (localData) {
+        try {
+          const snapshots = JSON.parse(localData);
+          const localSnapshot = snapshots.find(s => s.id === id);
+          if (localSnapshot) {
+            console.log('Found snapshot in localStorage, using as fallback');
+            setSelectedSnapshot(localSnapshot);
+            setError(null);
+          }
+        } catch (e) {
+          console.error('Error parsing localStorage data:', e);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -427,18 +462,30 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       setError(null);
       
       try {
-        // Delete from server
         await axios.delete(`/api/snapshots/${id}`);
         
-        // Refresh the snapshots list
-        await loadHistoricalData();
-        
+        // If successful, update local state immediately
+        setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
         if (selectedSnapshot && selectedSnapshot.id === id) {
           setSelectedSnapshot(null);
         }
+        
       } catch (error) {
-        console.error('Error deleting snapshot from server:', error);
-        setError(`Failed to delete snapshot: ${error.message}. Please check server connection.`);
+        console.error('Error deleting snapshot:', error);
+        
+        // Handle 404 Not Found specifically
+        if (error.response?.status === 404) {
+          // If snapshot is not found on server, remove it from local state
+          setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
+          if (selectedSnapshot && selectedSnapshot.id === id) {
+            setSelectedSnapshot(null);
+          }
+          setError("Snapshot was already deleted or doesn't exist. Local data has been updated.");
+        } else {
+          // Handle other errors
+          const errorMessage = error.response?.data?.message || error.message;
+          setError(`Failed to delete snapshot: ${errorMessage}. Please try again.`);
+        }
       } finally {
         setLoading(false);
       }
@@ -453,21 +500,37 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
   
   // View snapshot details with localStorage fallback
   const viewSnapshot = async (snapshotInfo) => {
-    // If we already have the detailed snapshot, no need to fetch again
-    if (selectedSnapshot && selectedSnapshot.id === snapshotInfo.id) {
-      return;
-    }
-    
     try {
-      // Try to fetch from server first
+      // If snapshot details are already in the data, use them
+      if (snapshotInfo.iraStats && snapshotInfo.ccStats) {
+        const normalizedSnapshot = {
+          ...snapshotInfo,
+          iraStats: typeof snapshotInfo.iraStats === 'string' 
+            ? JSON.parse(snapshotInfo.iraStats) 
+            : snapshotInfo.iraStats,
+          ccStats: typeof snapshotInfo.ccStats === 'string'
+            ? JSON.parse(snapshotInfo.ccStats)
+            : snapshotInfo.ccStats
+        };
+  
+        setSelectedSnapshot(normalizedSnapshot);
+        if (onSnapshotSelect) {
+          onSnapshotSelect(normalizedSnapshot);
+        }
+        return;
+      }
+  
+      // Otherwise fetch from server
       const response = await axios.get(`/api/snapshots/${snapshotInfo.id}`);
-      setSelectedSnapshot(response.data);
+      const fullSnapshot = response.data;
+  
+      setSelectedSnapshot(fullSnapshot);
+      if (onSnapshotSelect) {
+        onSnapshotSelect(fullSnapshot);
+      }
     } catch (error) {
-      console.warn('Failed to fetch snapshot from server, using local data');
-      
-      // Use the snapshot from the list if server fails
-      // For localStorage approach, the snapshot in the list usually has all needed data
-      setSelectedSnapshot(snapshotInfo);
+      console.error('Error loading snapshot:', error);
+      setError('Failed to load snapshot for viewing');
     }
   };
   
@@ -763,7 +826,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                     <span className="badge bg-success">Server Database</span>
                   </p>
                   <p className="mb-2">
-                    <strong>Path:</strong> <code>c:\Users\masamuel\Documents\excelAutomation\backend\snapshots\</code>
+                    <strong>Path:</strong> <code>Server Database</code>
                   </p>
                   <div className="alert alert-info">
                     <i className="bi bi-info-circle me-2"></i>

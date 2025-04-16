@@ -17,6 +17,8 @@ node_modules/.cache/**/*
 
 # Production
 /build
+/.next
+dist/
 
 # Misc
 .DS_Store
@@ -37,3 +39,8 @@ yarn-error.log*
 *.swp
 *.swo
 node_modules
+.vercel
+
+# Vercel
+.vercel
+.env*.local

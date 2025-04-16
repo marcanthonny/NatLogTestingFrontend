@@ -446,6 +446,74 @@ const processCcData = (data) => {
   return processedData;
 };
 
+useEffect(() => {
+  if (snapshotInfo) {
+    // Parse snapshot JSON data
+    addLog('Loading data from snapshot...', 'info');
+    try {
+      let parsedIraStats, parsedCcStats;
+
+      if (typeof snapshotInfo.iraStats === 'string') {
+        parsedIraStats = JSON.parse(snapshotInfo.iraStats);
+      } else {
+        parsedIraStats = snapshotInfo.iraStats;
+      }
+
+      if (typeof snapshotInfo.ccStats === 'string') {
+        parsedCcStats = JSON.parse(snapshotInfo.ccStats);
+      } else {
+        parsedCcStats = snapshotInfo.ccStats;
+      }
+
+      // Ensure branchPercentages is an array
+      if (!Array.isArray(parsedIraStats.branchPercentages)) {
+        parsedIraStats.branchPercentages = Object.entries(parsedIraStats.branchPercentages)
+          .map(([branch, percentage]) => ({ branch, percentage }));
+      }
+
+      if (!Array.isArray(parsedCcStats.branchPercentages)) {
+        parsedCcStats.branchPercentages = Object.entries(parsedCcStats.branchPercentages)
+          .map(([branch, percentage]) => ({ branch, percentage }));
+      }
+
+      setIraStats(parsedIraStats);
+      setCcStats(parsedCcStats);
+      addLog('Snapshot data loaded and parsed successfully', 'success');
+    } catch (error) {
+      addLog('Error parsing snapshot data: ' + error.message, 'error');
+      setError('Failed to parse snapshot data');
+    }
+  } else if (iraData && ccData) {
+    // ...existing code for handling uploaded data...
+  }
+}, [snapshotInfo, iraData, ccData]);
+
+// Update data processing functions to handle JSON string data
+const processSnapshotData = (snapshotData) => {
+  if (typeof snapshotData === 'string') {
+    try {
+      return JSON.parse(snapshotData);
+    } catch (error) {
+      console.error('Error parsing snapshot data:', error);
+      addLog('Error parsing snapshot JSON data', 'error');
+      return null;
+    }
+  }
+  return snapshotData;
+};
+
+// Add this helper function
+const normalizeSnapshotData = (snapshot) => {
+  if (!snapshot) return null;
+
+  return {
+    ...snapshot,
+    iraStats: processSnapshotData(snapshot.iraStats),
+    ccStats: processSnapshotData(snapshot.ccStats),
+    date: new Date(snapshot.date).toISOString(),
+  };
+};
+
   useEffect(() => {
     if (iraData && ccData) {
       addLog('Processing new uploads...', 'info');
@@ -613,3 +681,28 @@ const processCcData = (data) => {
     addLog,
   };
 };
+
+const IraCcDashboard = ({ iraData, ccData, snapshotInfo }) => {
+  const {
+    iraStats,
+    ccStats,
+    currentWeek,
+    error,
+    loading,
+    exportAsExcel,
+    createEmailDraft,
+    getBranchShortName,
+    VALID_BRANCHES,
+    handleSaveSettings,
+    logs,
+    addLog,
+  } = useIraCcDashboardLogic({ iraData, ccData, snapshotInfo });
+  
+  return (
+    <div className="cms-dashboard-container">
+      {/* Content will come from interfaces/IraCcComponents/IraCcDashboard.jsx */}
+    </div>
+  );
+};
+
+export default IraCcDashboard;

@@ -8,13 +8,14 @@
  */
 export const getSnapshotStorageLocation = async () => {
   try {
-    // Check if server is available
-    const response = await fetch('/api/snapshots', { method: 'HEAD' });
+    // Use the correct API path
+    const apiUrl = process.env.REACT_APP_API_URL || '';
+    const response = await fetch(`${apiUrl}/api/snapshots`, { method: 'HEAD' });
     
     if (response.ok) {
       return {
         location: 'server',
-        path: 'c:\\Users\\masamuel\\Documents\\excelAutomation\\backend\\snapshots\\'
+        path: 'Server Database'
       };
     }
   } catch (error) {

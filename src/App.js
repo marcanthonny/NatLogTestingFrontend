@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './interfaces/css/App.css';
 import './interfaces/css/Dashboard.css';
+// Fix imports to use correct paths and exports
 import EnhancedFileUpload from './interfaces/IraCcComponents/EnhancedFileUpload';
 import ExcelTable from './mechanisms/Excel Editor/ExcelTable';
 import FormulaBuilder from './mechanisms/Excel Editor/FormulaBuilder';

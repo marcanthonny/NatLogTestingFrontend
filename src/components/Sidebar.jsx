@@ -12,8 +12,8 @@ function Sidebar({ activeTab, setActiveTab, hasData, hasIraData, hasCcData }) {
   return (
     <div className="cms-sidebar">
       <div className="logo">
-        <h3>WikiTools</h3>
-        <p>#National Logistics</p>
+        <h3>Automation Project</h3>
+        <p>#NationalLogistics</p>
       </div>
       <ul className="nav flex-column">
         {/* Excel Editor - outside IRA CC Tools */}

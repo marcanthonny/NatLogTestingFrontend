@@ -52,6 +52,27 @@ export const useAnalyzeComponentLogic = ({ iraData, ccData, snapshotInfo }) => {
     loadPreviousWeekData();
   }, [iraData, ccData]);
   
+  // Modify useAnalyzeComponentLogic to handle JSON snapshot data
+  useEffect(() => {
+    if (snapshotInfo && snapshotInfo.ccStats) {
+      // If viewing a snapshot, use its data
+      const historyEntry = {
+        date: snapshotInfo.date,
+        average: snapshotInfo.ccStats.percentage,
+        branches: {}
+      };
+
+      // Convert branch percentages array to object format for charts
+      snapshotInfo.ccStats.branchPercentages.forEach(branch => {
+        historyEntry.branches[branch.branch] = branch.percentage;
+      });
+
+      setHistoricalData([historyEntry]);
+    } else if (ccData) {
+      // ...existing code for handling uploaded data...
+    }
+  }, [snapshotInfo, ccData]);
+  
   // Load saved historical data from localStorage - UPDATED with better date sorting
   const loadHistoricalData = () => {
     setLoading(true);
@@ -198,80 +219,49 @@ export const useAnalyzeComponentLogic = ({ iraData, ccData, snapshotInfo }) => {
   
   // Format data for overall growth chart
   const getOverallChartData = () => {
-    // Filter data based on selected timeframe
-    const filteredData = filterDataByTimeframe(historicalData);
-    
-    return {
-      labels: filteredData.map(entry => formatDate(entry.date)),
-      datasets: [{
-        label: 'Average CC %',
-        data: filteredData.map(entry => entry.average.toFixed(2)),
-        borderColor: 'rgba(0, 123, 255, 1)',
-        backgroundColor: 'rgba(0, 123, 255, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4
-      }]
-    };
+    if (!historicalData || historicalData.length === 0) return { labels: [], datasets: [] };
+
+    // For single snapshot view, show bar chart instead of line
+    if (historicalData.length === 1) {
+      return {
+        labels: ['Current'],
+        datasets: [{
+          label: 'CC %',
+          data: [historicalData[0].average.toFixed(2)],
+          backgroundColor: 'rgba(0, 123, 255, 0.5)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 2
+        }]
+      };
+    }
+
+    // ...existing code for multiple snapshots...
   };
   
   // Format data for branch-specific growth chart
   const getBranchChartData = () => {
-    // Only show individual branch data if a specific branch is selected
-    if (selectedBranch === 'all') {
-      // Show top 5 branches by latest percentage
-      const latestData = historicalData.length > 0 ? 
-        historicalData[historicalData.length - 1] : { branches: {} };
-      
-      // Sort branches by latest percentage
-      const topBranches = VALID_BRANCHES
-        .filter(branch => latestData.branches[branch] > 0)
-        .sort((a, b) => latestData.branches[b] - latestData.branches[a])
-        .slice(0, 5);
-      
-      const filteredData = filterDataByTimeframe(historicalData);
-      
+    if (!historicalData || historicalData.length === 0) return { labels: [], datasets: [] };
+
+    // For single snapshot, show branch comparison
+    if (historicalData.length === 1) {
+      const snapshot = historicalData[0];
+      const branchData = Object.entries(snapshot.branches)
+        .sort(([,a], [,b]) => b - a) // Sort by percentage
+        .slice(0, selectedBranch === 'all' ? 5 : 1); // Show top 5 or selected branch
+
       return {
-        labels: filteredData.map(entry => formatDate(entry.date)),
-        datasets: topBranches.map((branch, index) => {
-          const colors = [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)'
-          ];
-          
-          return {
-            label: getBranchShortName(branch),
-            data: filteredData.map(entry => 
-              entry.branches[branch] ? entry.branches[branch].toFixed(2) : 0
-            ),
-            borderColor: colors[index % colors.length],
-            backgroundColor: 'transparent',
-            borderWidth: 2
-          };
-        })
-      };
-    } else {
-      // Show single selected branch with growth trend
-      const filteredData = filterDataByTimeframe(historicalData);
-      
-      return {
-        labels: filteredData.map(entry => formatDate(entry.date)),
+        labels: branchData.map(([branch]) => getBranchShortName(branch)),
         datasets: [{
-          label: getBranchShortName(selectedBranch),
-          data: filteredData.map(entry => 
-            entry.branches[selectedBranch] ? entry.branches[selectedBranch].toFixed(2) : 0
-          ),
-          borderColor: 'rgba(54, 162, 235, 1)',
-          backgroundColor: 'rgba(54, 162, 235, 0.1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4
+          label: 'CC %',
+          data: branchData.map(([,value]) => value.toFixed(2)),
+          backgroundColor: 'rgba(0, 123, 255, 0.5)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 2
         }]
       };
     }
+
+    // ...existing code for multiple snapshots...
   };
   
   // Filter data by selected timeframe
@@ -545,4 +535,14 @@ export const useAnalyzeComponentLogic = ({ iraData, ccData, snapshotInfo }) => {
   };
 };
 
-export default useAnalyzeComponentLogic;
+const AnalyzeComponent = ({ iraData, ccData, snapshotInfo }) => {
+  const logic = useAnalyzeComponentLogic({ iraData, ccData, snapshotInfo });
+  
+  return (
+    <div className="analyze-container">
+      {/* Content will come from interfaces/IraCcComponents/AnalyzeComponent.jsx */}
+    </div>
+  );
+};
+
+export default AnalyzeComponent;
