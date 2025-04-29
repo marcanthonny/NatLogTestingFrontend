@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
 import '../../interfaces/css/components/HistoricalDataComponent.css';
 import { getSnapshotStorageLocation, exportLocalSnapshots, importLocalSnapshots } from '../../utils/snapshotUtils';
 import { getApiUrl } from '../../config/api';
-
-// Configure axios base URL
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 const VALID_BRANCHES = [
   '1982 - PT. APL JAYAPURA',
@@ -82,7 +79,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     
     try {
       // Use full URL from config including /api prefix
-      const response = await axios.get('/api/snapshots', {
+      const response = await axiosInstance.get('/api/snapshots', {
         timeout: 5000,
         headers: {
           'Accept': 'application/json',
@@ -140,7 +137,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     setError(null);
     
     try {
-      const response = await axios.get(`/api/snapshots/${id}`);
+      const response = await axiosInstance.get(`/api/snapshots/${id}`);
       if (!response.data) {
         throw new Error('Empty response received');
       }
@@ -266,7 +263,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       try {
         console.log('Saving snapshot to server:', snapshot.name);
         
-        const response = await axios.post('/api/snapshots', snapshot, {
+        const response = await axiosInstance.post('/api/snapshots', snapshot, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -462,7 +459,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       setError(null);
       
       try {
-        await axios.delete(`/api/snapshots/${id}`);
+        await axiosInstance.delete(`/api/snapshots/${id}`);
         
         // If successful, update local state immediately
         setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
@@ -521,7 +518,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       }
   
       // Otherwise fetch from server
-      const response = await axios.get(`/api/snapshots/${snapshotInfo.id}`);
+      const response = await axiosInstance.get(`/api/snapshots/${snapshotInfo.id}`);
       const fullSnapshot = response.data;
   
       setSelectedSnapshot(fullSnapshot);
@@ -704,7 +701,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
   // Add function to view snapshot in dashboard/analyze
   const handleViewSnapshot = async (snapshot) => {
     try {
-      const response = await axios.get(`/api/snapshots/${snapshot.id}`);
+      const response = await axiosInstance.get(`/api/snapshots/${snapshot.id}`);
       const fullSnapshot = response.data;
       
       // Pass both the snapshot stats and raw data

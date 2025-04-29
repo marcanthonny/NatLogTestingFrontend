@@ -4,57 +4,81 @@
 
 /* Log container styling */
 .log-container {
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
-  padding: 10px;
+  padding: 1rem;
   background-color: #f8f9fa;
   border-radius: 4px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #000000;
   font-family: monospace;
+  font-size: 0.85rem;
 }
 
 .log-entry {
-  padding: 2px 0;
+  padding: 0.25rem;
+  margin-bottom: 0.25rem;
+  border-radius: 4px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.5;
 }
 
 .log-time {
-  margin-right: 8px;
+  margin-right: 0.5rem;
   font-weight: bold;
-  color: #666;
+  color: #6c757d;
 }
 
 .log-info {
-  color: #0c5460;
+  color: #0d6efd;
 }
 
 .log-success {
-  color: #155724;
+  color: #198754;
 }
 
 .log-warning {
-  color: #856404;
+  color: #ffc107;
 }
 
 .log-error {
-  color: #721c24;
+  color: #dc3545;
 }
 
 .upload-container {
-  padding: 20px;
+  padding: 15px;
+  max-width: 100%;
+  margin: 0 auto;
   min-height: 400px;
 }
 
 .upload-card {
+  margin-bottom: 1rem;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
   height: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+  background: white;
+  color: black; 
+  border: 1px solid #000000;
 }
 
 .upload-card:hover {
   transform: translateY(-5px);
+}
+
+.card-header {
+  border-top-left-radius: 8px !important;
+  border-top-right-radius: 8px !important;
+  padding: 1rem;
+  background: white;
+  color: black;
+}
+
+.card-header h5 {
+  margin: 0;
+  font-size: 1rem;
 }
 
 .file-drop-area {
@@ -64,40 +88,77 @@
   justify-content: center;
   align-items: center;
   height: 200px;
-  border: 2px dashed #ccc;
+  border: 2px dashed #000000;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #f8f9fa;
   transition: all 0.3s;
   cursor: pointer;
-  padding: 20px;
+  padding: 2rem 1rem;
   text-align: center;
 }
 
 .file-drop-area.dragging {
-  background-color: #e9f5ff;
-  border-color: #007bff;
+  background-color: #e9ecef;
+  border-color: #000000;
+}
+
+.file-drop-area:hover {
+  background-color: #e9ecef;
 }
 
 .file-drop-area .drop-message {
-  color: #6c757d;
+  color: #000000;
 }
 
 .file-drop-area .drop-message i {
-  color: #adb5bd;
-  margin-bottom: 10px;
+  color: #000000;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
 }
 
-.file-drop-area .selected-file {
+.file-drop-area .drop-message p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.selected-files {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selected-file {
+  width: 100%;
   display: flex;
   align-items: center;
-  padding: 10px 15px;
-  background-color: #e9ecef;
+  padding: 0.5rem;
+  background-color: #fff;
   border-radius: 4px;
-  width: 100%;
-  word-break: break-all;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.selected-file span {
+  margin: 0 0.5rem;
+  flex: 1;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-file .btn-outline-danger {
+  padding: 0.2rem 0.4rem;
+  line-height: 1;
+}
+
+.file-drop-area {
+  pointer-events: all;
+  cursor: pointer;
 }
 
 .file-input {
+  display: block;
   position: absolute;
   top: 0;
   left: 0;
@@ -105,12 +166,13 @@
   height: 100%;
   opacity: 0;
   cursor: pointer;
+  z-index: 1;
 }
 
 .progress {
-  height: 15px;
-  margin: 15px 15px;
-  border-radius: 8px;
+  height: 0.75rem;
+  margin: 1rem 0;
+  border-radius: 0.375rem;
   overflow: hidden;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
@@ -126,7 +188,11 @@
 
 .advanced-settings-toggle {
   text-align: right;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
+}
+
+.form-switch {
+  padding-left: 2.5rem;
 }
 
 /* Loading spinner for file processing */
@@ -142,7 +208,7 @@
   height: 40px;
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  border-left-color: #007bff;
+  border-left-color: #000000;
   animation: spin 1s linear infinite;
 }
 
@@ -171,11 +237,12 @@
   }
 
   .drop-message p {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .log-container {
     max-height: 200px;
+    font-size: 0.75rem;
   }
 
   .advanced-settings-toggle {
@@ -188,6 +255,8 @@
   .btn {
     width: 100%;
     margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
 
   .btn-group {
@@ -198,4 +267,123 @@
     width: 100%;
     margin-bottom: 0.5rem;
   }
+
+  .upload-container {
+    padding: 10px;
+  }
+
+  .file-drop-area {
+    min-height: 120px;
+    padding: 1rem;
+  }
+
+  .upload-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .upload-button,
+  .clear-button {
+    width: 100%;
+  }
+
+  .file-info {
+    font-size: 0.875rem;
+  }
+
+  .progress-wrapper {
+    margin: 1rem -10px;
+  }
+
+  .selected-file {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .selected-file span {
+    margin: 0.5rem 0;
+    font-size: 0.8rem;
+  }
+
+  .form-switch {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Tablet Responsiveness */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .upload-container {
+    padding: 12px;
+  }
+
+  .file-drop-area {
+    min-height: 180px;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) {
+  .file-drop-area {
+    background-color: #f8f9fa;
+  }
+
+  .file-drop-area:active {
+    background-color: #e9ecef;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .file-drop-area {
+    background-color: #ffffff;
+    border-color: #495057;
+  }
+
+  .card {
+    background-color: #ffffff;
+  }
+
+  .drop-message {
+    color: #adb5bd;
+  }
+
+  .selected-file {
+    background-color: #ffffff;
+    border-color: black;
+  }
+
+  .log-container {
+    background-color: #2b3035;
+  }
+}
+
+.upload-actions {
+  position: relative;
+  z-index: 10;
+  pointer-events: all;
+}
+
+.upload-button {
+  position: relative;
+  z-index: 11;
+  pointer-events: all;
+}
+
+.upload-button:not(:disabled) {
+  cursor: pointer;
 }

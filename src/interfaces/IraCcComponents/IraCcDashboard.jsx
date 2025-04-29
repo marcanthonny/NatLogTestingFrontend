@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useIraCcDashboardLogic } from '../../mechanisms/IRA CC/IraCcDashboard';
 import WeekTargetConfiguration from '../../mechanisms/IRA CC/WeekTargetConfiguration';
 import '../css/components/IraCcDashboard.css';
@@ -15,39 +15,18 @@ const getWeekTargets = (snapshotInfo) => {
 };
 
 function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
-  // Add this helper function
-  const getDefaultCcTarget = (weekNumber) => {
-    const defaultTargets = {
-      1: 25,
-      2: 50,
-      3: 75,
-      4: 99
-    };
-    return defaultTargets[weekNumber] || 99;
-  };
-
-  const [error, setError] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
-  const [availablePeriods, setAvailablePeriods] = React.useState([]);
-  const [selectedPeriod, setSelectedPeriod] = React.useState('');
-  const [showSettings, setShowSettings] = React.useState(false);
-  const [weekSettings, setWeekSettings] = React.useState({});
-  const [showConfig, setShowConfig] = React.useState(false);
-  const [currentWeek, setCurrentWeek] = React.useState(null);
-  const dashboardRef = React.useRef(null);
+  const [activeTable, setActiveTable] = useState('ira');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [availablePeriods, setAvailablePeriods] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [showConfig, setShowConfig] = useState(false);
+  const [currentWeek, setCurrentWeek] = useState(null);
   const [dataSource, setDataSource] = useState('current');
   const [iraStats, setIraStats] = useState({ counted: 0, notCounted: 0, percentage: 0, branchPercentages: [] });
   const [ccStats, setCcStats] = useState({ counted: 0, notCounted: 0, percentage: 0, branchPercentages: [] });
+  const dashboardRef = useRef(null);
 
-  const formatDate = (date) => new Date(date).toLocaleDateString();
-  const meetsIraTarget = (percentage) => {
-    if (percentage === undefined || currentWeek?.ira?.target === undefined) return false;
-    return percentage >= (currentWeek?.ira?.target || 0);
-  };
-  const meetsCcTarget = (percentage) => {
-    if (percentage === undefined || currentWeek?.cc?.target === undefined) return false;
-    return percentage >= (currentWeek?.cc?.target || 0);
-  };
   const {
     exportAsExcel,
     createEmailDraft,
@@ -55,7 +34,24 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
     handleSaveSettings,
     logs,
     addLog,
-  } = useIraCcDashboardLogic({ iraData, ccData, snapshotInfo });
+  } = useIraCcDashboardLogic({ iraData, ccData });
+
+  const getDefaultCcTarget = (weekNumber) => {
+    const defaultTargets = { 1: 25, 2: 50, 3: 75, 4: 99 };
+    return defaultTargets[weekNumber] || 99;
+  };
+
+  const formatDate = (date) => date ? new Date(date).toLocaleDateString() : '';
+  
+  const meetsIraTarget = (percentage) => {
+    if (percentage === undefined || currentWeek?.ira?.target === undefined) return false;
+    return percentage >= (currentWeek?.ira?.target || 0);
+  };
+
+  const meetsCcTarget = (percentage) => {
+    if (percentage === undefined || currentWeek?.cc?.target === undefined) return false;
+    return percentage >= (currentWeek?.cc?.target || 0);
+  };
 
   const handleConfigurationUpdate = (newConfig) => {
     handleSaveSettings(newConfig);
@@ -181,7 +177,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
   useEffect(() => {
     let weekNumber;
     
-    if (snapshotInfo) {
+    if (snapshotInfo) { 
       // For historical snapshots, get week from name
       weekNumber = getWeekFromName(snapshotInfo.name);
     } else if (iraData || ccData) {
@@ -360,8 +356,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
   };
 
   return (
-    <div className="cms-dashboard-container">
-      {/* Add data source selector */}
+    <div className="dashboard-container">
+      {/* Data source selector */}
       {snapshotInfo && (iraData || ccData) && (
         <div className="card mb-3">
           <div className="card-body py-2">
@@ -382,7 +378,6 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                   Snapshot: {snapshotInfo.name}
                 </button>
               </div>
-              
               <small className="text-muted">
                 {dataSource === 'snapshot' ? 
                   `Viewing snapshot from ${formatDate(snapshotInfo.date)}` : 
@@ -393,103 +388,67 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
         </div>
       )}
 
-      {error && (
-        <div className="alert alert-danger mb-4">
-          <i className="bi bi-exclamation-triangle-fill me-2"></i>
-          {error}
-        </div>
-      )}
-      {/* Export and Settings buttons */}
-      <div className="mb-3">
-        <div className="btn-group">
-          <button 
-            className="btn btn-outline-success" 
-            onClick={exportAsExcel}
-            title="Export as Excel spreadsheet"
-          >
-            <i className="bi bi-file-earmark-excel me-1"></i> Excel
-          </button>
-          <button 
-            className="btn btn-outline-primary"
-            onClick={() => setShowConfig(true)}
-          >
-            <i className="bi bi-gear me-1"></i> Configure Targets
-          </button>
-          <button 
-            className="btn btn-outline-secondary"
-            onClick={createEmailDraft}
-            disabled={loading}
-          >
-            <i className="bi bi-envelope me-1"></i> Create Email Draft
-          </button>
-        </div>
+      {/* Mobile data selector */}
+      <div className="d-block d-md-none data-selector-mobile">
+        <select 
+          value={activeTable}
+          onChange={(e) => setActiveTable(e.target.value)}
+          className="form-select mb-3"
+        >
+          <option value="ira">IRA Data</option>
+          <option value="cc">CC Data</option>
+        </select>
       </div>
-      
-      {/* Dashboard content with ref for export */}
+
+      {/* Main content area */}
       <div ref={dashboardRef}>
-        {/* Current week info */}
+        {/* Control buttons */}
+        <div className="mb-3">
+          <div className="btn-group">
+            <button className="btn btn-outline-success" onClick={exportAsExcel}>
+              <i className="bi bi-file-earmark-excel me-1"></i> Export Excel
+            </button>
+            <button className="btn btn-outline-primary" onClick={() => setShowConfig(true)}>
+              <i className="bi bi-gear me-1"></i> Configure
+            </button>
+            <button className="btn btn-outline-secondary" onClick={createEmailDraft}>
+              <i className="bi bi-envelope me-1"></i> Email Draft
+            </button>
+          </div>
+        </div>
+
+        {/* Current Week Status Card */}
         {currentWeek && (
           <div className="card mb-4">
-            <div className="card-header">
-              <h5 className="mb-0">Current Week Status</h5>
+            <div className="card-header text-white">
+              <h5 className="mb-0">Active Week Status</h5>
             </div>
             <div className="card-body">
               <div className="row">
                 <div className="col-md-6">
-                  <div className="card">
-                    <div className="card-header bg-primary">
-                      <h6 className="mb-0">IRA Week</h6>
-                    </div>
-                    <div className="card-body">
-                      {currentWeek.ira ? (
-                        <>
-                          <p><strong>{currentWeek.ira.week.replace('week', 'Week ')}</strong> ({formatDate(currentWeek.ira.startDate)} - {formatDate(currentWeek.ira.endDate)})</p>
-                          <p>Target: <span className="fw-bold">{currentWeek.ira.target}%</span></p>
-                          <div className="progress">
-                            <div 
-                              className={`progress-bar ${iraStats.percentage >= currentWeek.ira.target ? 'bg-success' : 'bg-danger'}`} 
-                              role="progressbar" 
-                              style={{width: `${Math.min(iraStats.percentage, 100)}%`}}
-                              aria-valuenow={iraStats.percentage} 
-                              aria-valuemin="0" 
-                              aria-valuemax="100"
-                            >
-                              {iraStats.percentage.toFixed(1)}%
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-muted">No IRA week is currently active</p>
+                  <div className="alert alert-primary mb-0">
+                    <h6 className="mb-2">IRA Week</h6>
+                    <strong>{currentWeek.ira?.week}</strong>
+                    <div className="mt-1">
+                      <small>Target: {currentWeek.ira?.target}%</small>
+                      {currentWeek.ira?.startDate && (
+                        <small className="d-block">
+                          {formatDate(currentWeek.ira.startDate)} - {formatDate(currentWeek.ira.endDate)}
+                        </small>
                       )}
                     </div>
                   </div>
                 </div>
-                
                 <div className="col-md-6">
-                  <div className="card">
-                    <div className="card-header bg-info">
-                      <h6 className="mb-0">CC Week</h6>
-                    </div>
-                    <div className="card-body">
-                      {currentWeek.cc ? (
-                        <>
-                          <p><strong>{currentWeek.cc.week.replace('week', 'Week ')}</strong> ({formatDate(currentWeek.cc.startDate)} - {formatDate(currentWeek.cc.endDate)})</p>
-                          <p>Target: <span className="fw-bold">{currentWeek.cc.target}%</span></p>
-                          <div className="progress">
-                            <div 
-                              className={`progress-bar ${ccStats.percentage >= currentWeek.cc.target ? 'bg-success' : 'bg-warning'}`}
-                              role="progressbar" 
-                              style={{width: `${Math.min(ccStats.percentage, 100)}%`}}
-                              aria-valuenow={ccStats.percentage} 
-                              aria-valuemin="0" 
-                              aria-valuemax="100"
-                            >
-                              {ccStats.percentage.toFixed(1)}%
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-muted">No CC week is currently active</p>
+                  <div className="alert alert-info mb-0">
+                    <h6 className="mb-2">CC Week</h6>
+                    <strong>{currentWeek.cc?.week}</strong>
+                    <div className="mt-1">
+                      <small>Target: {currentWeek.cc?.target}%</small>
+                      {currentWeek.cc?.startDate && (
+                        <small className="d-block">
+                          {formatDate(currentWeek.cc.startDate)} - {formatDate(currentWeek.cc.endDate)}
+                        </small>
                       )}
                     </div>
                   </div>
@@ -498,100 +457,64 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
             </div>
           </div>
         )}
-        
-        {/* Period selector for PowerBI data */}
-        {availablePeriods.length > 0 && (
-          <div className="card mb-4">
-            <div className="card-header">
-              <h5 className="mb-0">Select Period</h5>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-6">
-                  <select 
-                    className="form-select" 
-                    value={selectedPeriod} 
-                    onChange={(e) => setSelectedPeriod(e.target.value)}
-                  >
-                    {availablePeriods.map(period => (
-                      <option key={period} value={period}>{period}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <div className="row">
-          {/* IRA Summary */}
-          <div className="col-md-6 mb-4">
-            <div className="card">
-              <div className="card-header bg-primary">
-                <h5 className="mb-0">IRA Summary</h5>
-              </div>
-              <div className="card-body">
-                <div className="row mb-4">
-                  <div className="col-md-4">
-                    <div className="card bg-light">
-                      <div className="card-body text-center">
-                        <h5 className="card-title">Counted</h5>
-                        <h3 className="text-success">{iraStats.counted}</h3>
+
+        {/* Desktop view - both tables */}
+        <div className="weekDesktop d-none d-md-block">
+          <div className="row">
+            {/* IRA Summary Card */}
+            <div className="col-md-6 mb-4">
+              <div className="card">
+                <div className="card-header bg-primary text-white">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">IRA Summary</h5>
+                    {currentWeek?.ira && (
+                      <div className="text-end">
+                        <small className="d-block">{currentWeek.ira.week}</small>
+                        <small className="d-block">Target: {currentWeek.ira.target}%</small>
                       </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="card bg-light">
-                      <div className="card-body text-center">
-                        <h5 className="card-title">Not Counted</h5>
-                        <h3 className="text-danger">{iraStats.notCounted}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="card bg-light">
-                      <div className="card-body text-center">
-                        <h5 className="card-title">Percentage</h5>
-                        <h3 className={
-                          currentWeek && currentWeek.ira
-                            ? iraStats.percentage >= currentWeek.ira.target ? "text-success" : "text-danger"
-                            : iraStats.percentage > 80 ? "text-success" : "text-warning"
-                        }>
-                          {iraStats.percentage.toFixed(2)}%
-                        </h3>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
-                
-                <h6 className="mb-3">Branch Percentages</h6>
-                <div className="table-responsive">
-                  <table className="table table-striped table-sm table-hover">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Branch</th>
-                        <th className="text-end">IRA %</th>
-                        {currentWeek && currentWeek.ira && (
+                <div className="card-body">
+                  {/* IRA stats content */}
+                  <div className="row mb-3">
+                    <div className="col-4 text-center">
+                      <h6>Hit</h6>
+                      <h3 className="text-success">{iraStats.counted}</h3>
+                    </div>
+                    <div className="col-4 text-center">
+                      <h6>Missed</h6>
+                      <h3 className="text-danger">{iraStats.notCounted}</h3>
+                    </div>
+                    <div className="col-4 text-center">
+                      <h6>Percentage</h6>
+                      <h3 className={iraStats.percentage >= 99 ? "text-success" : "text-danger"}>
+                        {iraStats.percentage.toFixed(2)}%
+                      </h3>
+                    </div>
+                  </div>
+                  {/* Add IRA branch percentages table */}
+                  <h6 className="mb-3">Branch Percentages</h6>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th className="text-start">Branch</th>
+                          <th className="text-end">IRA %</th>
                           <th className="text-center">Status</th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {iraStats.branchPercentages
-                        .sort((a, b) => b.percentage - a.percentage) // Sort from highest to lowest
-                        .map((branch, index) => (
-                          <tr key={index}>
-                            <td>{branch.branch}</td>
-                            <td className="text-end">
-                              <span className={
-                                currentWeek && currentWeek.ira
-                                  ? meetsIraTarget(branch.percentage) ? "text-success" : "text-danger"
-                                  : branch.percentage > 80 ? "text-success" : "text-warning"
-                              }>
-                                {branch.percentage.toFixed(2)}%
-                              </span>
-                            </td>
-                            {currentWeek && currentWeek.ira && (
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {iraStats.branchPercentages
+                          .sort((a, b) => b.percentage - a.percentage)
+                          .map((branch, index) => (
+                            <tr key={index}>
+                              <td className="text-start">{branch.branch}</td>
+                              <td className="text-end">
+                                <span className={meetsIraTarget(branch.percentage) ? "text-success" : "text-danger"}>
+                                  {branch.percentage.toFixed(2)}%
+                                </span>
+                              </td>
                               <td className="text-center">
                                 {meetsIraTarget(branch.percentage) ? (
                                   <span className="badge bg-success">On Target</span>
@@ -599,84 +522,69 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                                   <span className="badge bg-danger">Below Target</span>
                                 )}
                               </td>
-                            )}
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* CC Summary */}
-          <div className="col-md-6 mb-4">
-            <div className="card">
-              <div className="card-header bg-info">
-                <h5 className="mb-0">Cycle Count Summary</h5>
-              </div>
-              <div className="card-body">
-                <div className="row mb-4">
-                  <div className="col-md-4">
-                    <div className="card bg-light">
-                      <div className="card-body text-center">
-                        <h5 className="card-title">Counted</h5>
-                        <h3 className="text-success">{ccStats.counted}</h3>
+
+            {/* CC Summary Card */}
+            <div className="col-md-6 mb-4">
+              <div className="card">
+                <div className="card-header bg-info text-white">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">CC Summary</h5>
+                    {currentWeek?.cc && (
+                      <div className="text-end">
+                        <small className="d-block">{currentWeek.cc.week}</small>
+                        <small className="d-block">Target: {currentWeek.cc.target}%</small>
                       </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="card bg-light">
-                      <div className="card-body text-center">
-                        <h5 className="card-title">Not Counted</h5>
-                        <h3 className="text-danger">{ccStats.notCounted}</h3>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="card bg-light">
-                      <div className="card-body text-center">
-                        <h5 className="card-title">Percentage</h5>
-                        <h3 className={
-                          currentWeek && currentWeek.cc
-                            ? ccStats.percentage >= currentWeek.cc.target ? "text-success" : "text-danger"
-                            : ccStats.percentage > 80 ? "text-success" : "text-warning"
-                        }>
-                          {ccStats.percentage.toFixed(2)}%
-                        </h3>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
-                
-                <h6 className="mb-3">Branch Percentages</h6>
-                <div className="table-responsive">
-                  <table className="table table-striped table-sm table-hover">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Branch</th>
-                        <th className="text-end">CC %</th>
-                        {currentWeek && currentWeek.cc && (
+                <div className="card-body">
+                  {/* CC stats content */}
+                  <div className="row mb-3">
+                    <div className="col-4 text-center">
+                      <h6>Counted</h6>
+                      <h3 className="text-success">{ccStats.counted}</h3>
+                    </div>
+                    <div className="col-4 text-center">
+                      <h6>Not Counted</h6>
+                      <h3 className="text-danger">{ccStats.notCounted}</h3>
+                    </div>
+                    <div className="col-4 text-center">
+                      <h6>Percentage</h6>
+                      <h3 className={ccStats.percentage >= currentWeek?.cc?.target ? "text-success" : "text-warning"}>
+                        {ccStats.percentage.toFixed(2)}%
+                      </h3>
+                    </div>
+                  </div>
+                  {/* Add CC branch percentages table */}
+                  <h6 className="mb-3">Branch Percentages</h6>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th className="text-start">Branch</th>
+                          <th className="text-end">CC %</th>
                           <th className="text-center">Status</th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ccStats.branchPercentages
-                        .sort((a, b) => b.percentage - a.percentage) // Sort from highest to lowest
-                        .map((branch, index) => (
-                          <tr key={index}>
-                            <td>{branch.branch}</td>
-                            <td className="text-end">
-                              <span className={
-                                currentWeek && currentWeek.cc
-                                  ? meetsCcTarget(branch.percentage) ? "text-success" : "text-danger"
-                                  : branch.percentage > 80 ? "text-success" : "text-warning"
-                              }>
-                                {branch.percentage.toFixed(2)}%
-                              </span>
-                            </td>
-                            {currentWeek && currentWeek.cc && (
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ccStats.branchPercentages
+                          .sort((a, b) => b.percentage - a.percentage)
+                          .map((branch, index) => (
+                            <tr key={index}>
+                              <td className="text-start">{branch.branch}</td>
+                              <td className="text-end">
+                                <span className={meetsCcTarget(branch.percentage) ? "text-success" : "text-danger"}>
+                                  {branch.percentage.toFixed(2)}%
+                                </span>
+                              </td>
                               <td className="text-center">
                                 {meetsCcTarget(branch.percentage) ? (
                                   <span className="badge bg-success">On Target</span>
@@ -684,7 +592,190 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                                   <span className="badge bg-danger">Below Target</span>
                                 )}
                               </td>
-                            )}
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile view - single table */}
+        <div className="d-block d-md-none">
+          {/* Week Status Card - Only show relevant section */}
+          {currentWeek && (
+            <div className="card mb-4">
+              <div className="card-header text-white">
+                <h5 className="mb-0">Active Week Status</h5>
+              </div>
+              <div className="card-body p-0">
+                {activeTable === 'ira' && currentWeek.ira && (
+                  <div className="alert alert-primary m-3 mb-3">
+                    <h6 className="mb-2">IRA Week</h6>
+                    <strong>{currentWeek.ira.week}</strong>
+                    <div className="mt-1">
+                      <small>Target: {currentWeek.ira.target}%</small>
+                      {currentWeek.ira.startDate && (
+                        <small className="d-block">
+                          {formatDate(currentWeek.ira.startDate)} - {formatDate(currentWeek.ira.endDate)}
+                        </small>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {activeTable === 'cc' && currentWeek.cc && (
+                  <div className="alert alert-info m-3 mb-3">
+                    <h6 className="mb-2">CC Week</h6>
+                    <strong>{currentWeek.cc.week}</strong>
+                    <div className="mt-1">
+                      <small>Target: {currentWeek.cc.target}%</small>
+                      {currentWeek.cc.startDate && (
+                        <small className="d-block">
+                          {formatDate(currentWeek.cc.startDate)} - {formatDate(currentWeek.cc.endDate)}
+                        </small>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className={`data-table-section ${activeTable === 'ira' ? 'd-block' : 'd-none'}`}>
+            {/* Mobile IRA Summary Card */}
+            <div className="card mb-4">
+              <div className="card-header bg-primary text-white">
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">IRA Summary</h5>
+                  {currentWeek?.ira && (
+                    <div className="text-end">
+                      <small className="d-block">{currentWeek.ira.week}</small>
+                      <small className="d-block">Target: {currentWeek.ira.target}%</small>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="card-body">
+                {/* IRA stats content */}
+                <div className="row mb-3">
+                  <div className="col-4 text-center">
+                    <h6>Counted</h6>
+                    <h3 className="text-success">{iraStats.counted}</h3>
+                  </div>
+                  <div className="col-4 text-center">
+                    <h6>Not Counted</h6>
+                    <h3 className="text-danger">{iraStats.notCounted}</h3>
+                  </div>
+                  <div className="col-4 text-center">
+                    <h6>Percentage</h6>
+                    <h3 className={iraStats.percentage >= 99 ? "text-success" : "text-danger"}>
+                      {iraStats.percentage.toFixed(2)}%
+                    </h3>
+                  </div>
+                </div>
+                {/* IRA branch percentages table */}
+                <h6 className="mb-3">Branch Percentages</h6>
+                <div className="table-responsive">
+                  <table className="table table-sm table-hover">
+                    <thead>
+                      <tr>
+                        <th className="text-start">Branch</th>
+                        <th className="text-end">IRA %</th>
+                        <th className="text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {iraStats.branchPercentages
+                        .sort((a, b) => b.percentage - a.percentage)
+                        .map((branch, index) => (
+                          <tr key={index}>
+                            <td className="text-start">{branch.branch}</td>
+                            <td className="text-end">
+                              <span className={meetsIraTarget(branch.percentage) ? "text-success" : "text-danger"}>
+                                {branch.percentage.toFixed(2)}%
+                              </span>
+                            </td>
+                            <td className="text-center">
+                              {meetsIraTarget(branch.percentage) ? (
+                                <span className="badge bg-success">On Target</span>
+                              ) : (
+                                <span className="badge bg-danger">Below Target</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={`data-table-section ${activeTable === 'cc' ? 'd-block' : 'd-none'}`}>
+            {/* Mobile CC Summary Card */}
+            <div className="card mb-4">
+              <div className="card-header bg-info text-white">
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0">CC Summary</h5>
+                  {currentWeek?.cc && (
+                    <div className="text-end">
+                      <small className="d-block">{currentWeek.cc.week}</small>
+                      <small className="d-block">Target: {currentWeek.cc.target}%</small>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="card-body">
+                {/* CC stats content */}
+                <div className="row mb-3">
+                  <div className="col-4 text-center">
+                    <h6>Counted</h6>
+                    <h3 className="text-success">{ccStats.counted}</h3>
+                  </div>
+                  <div className="col-4 text-center">
+                    <h6>Not Counted</h6>
+                    <h3 className="text-danger">{ccStats.notCounted}</h3>
+                  </div>
+                  <div className="col-4 text-center">
+                    <h6>Percentage</h6>
+                    <h3 className={ccStats.percentage >= currentWeek?.cc?.target ? "text-success" : "text-warning"}>
+                      {ccStats.percentage.toFixed(2)}%
+                    </h3>
+                  </div>
+                </div>
+                {/* CC branch percentages table */}
+                <h6 className="mb-3">Branch Percentages</h6>
+                <div className="table-responsive">
+                  <table className="table table-sm table-hover">
+                    <thead>
+                      <tr>
+                        <th className="text-start">Branch</th>
+                        <th className="text-end">CC %</th>
+                        <th className="text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ccStats.branchPercentages
+                        .sort((a, b) => b.percentage - a.percentage)
+                        .map((branch, index) => (
+                          <tr key={index}>
+                            <td className="text-start">{branch.branch}</td>
+                            <td className="text-end">
+                              <span className={meetsCcTarget(branch.percentage) ? "text-success" : "text-danger"}>
+                                {branch.percentage.toFixed(2)}%
+                              </span>
+                            </td>
+                            <td className="text-center">
+                              {meetsCcTarget(branch.percentage) ? (
+                                <span className="badge bg-success">On Target</span>
+                              ) : (
+                                <span className="badge bg-danger">Below Target</span>
+                              )}
+                            </td>
                           </tr>
                         ))}
                     </tbody>
@@ -695,55 +786,13 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
           </div>
         </div>
       </div>
-      
-      {/* Replace WeekTargetSettings with WeekTargetConfiguration */}
+
+      {/* Configuration modal */}
       <WeekTargetConfiguration
         show={showConfig}
         onHide={() => setShowConfig(false)}
         onUpdate={handleConfigurationUpdate}
       />
-
-      {/* Add log display section */}
-      <div className="card mt-4">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Processing Logs</h5>
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => addLog('Logs cleared', 'info')}
-          >
-            <i className="bi bi-trash me-2"></i>
-            Clear Logs
-          </button>
-        </div>
-        <div className="card-body">
-          <div className="log-container" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-            {logs.length === 0 ? (
-              <p className="text-muted">No processing logs yet.</p>
-            ) : (
-              <div className="logs">
-                {logs.map((log, index) => (
-                  <div 
-                    key={index} 
-                    className={`log-entry ${log.type}`}
-                    style={{ 
-                      padding: '4px 8px',
-                      borderLeft: `3px solid ${
-                        log.type === 'error' ? '#dc3545' :
-                        log.type === 'warning' ? '#ffc107' :
-                        log.type === 'success' ? '#198754' :
-                        '#0dcaf0'
-                      }`
-                    }}
-                  >
-                    <small className="text-muted me-2">[{log.timestamp}]</small>
-                    <span>{log.message}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

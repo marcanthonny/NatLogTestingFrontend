@@ -17,6 +17,18 @@
       "dest": "/static/$1"
     },
     {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/apl-icon(.*)",
+      "dest": "/apl-icon$1"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "https://aplnatlog-backend.vercel.app/api/$1"
     },
@@ -30,11 +42,15 @@
     "silent": true
   },
   "env": {
-    "REACT_APP_API_URL": "https://aplnatlog-backend.vercel.app"
+    "REACT_APP_API_URL": "https://aplnatlog-backend.vercel.app",
+    "REACT_APP_API_USERNAME": "admin",
+    "REACT_APP_API_PASSWORD": "Admin@1234"
   },
   "build": {
     "env": {
-      "REACT_APP_API_URL": "https://aplnatlog-backend.vercel.app"
+      "REACT_APP_API_URL": "https://aplnatlog-backend.vercel.app",
+      "REACT_APP_API_USERNAME": "admin", 
+      "REACT_APP_API_PASSWORD": "Admin@1234"
     }
   }
 }

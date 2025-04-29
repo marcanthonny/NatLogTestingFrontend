@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../css/UndoRedo.css';
+import '../css/components/UndoRedo.css';
 
 function UndoRedo({ canUndo, canRedo, onUndo, onRedo }) {
   return (

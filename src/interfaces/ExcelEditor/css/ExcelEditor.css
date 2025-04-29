@@ -22,7 +22,7 @@
 
 .dropzone:hover,
 .dropzone.active {
-  border-color: #005e32;
+  border-color: #000000;
   background-color: rgba(0, 94, 50, 0.05);
 }
 

@@ -59,13 +59,21 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
     };
   }, []);
 
-  const handleFileSelect = (file, category) => {
-    if (category === 'ira') {
-      setSelectedIraFile(file);
-      addLog(`IRA file selected: ${file.name}`, 'info');
-    } else {
-      setSelectedCcFile(file);
-      addLog(`CC file selected: ${file.name}`, 'info');
+  const handleFileSelect = (files) => {
+    // Handle multiple files
+    for (const file of files) {
+      const isIraFile = file.name.toLowerCase().includes('ira');
+      const isCcFile = file.name.toLowerCase().includes('cc');
+      
+      if (isIraFile) {
+        setSelectedIraFile(file);
+        addLog(`IRA file selected: ${file.name}`, 'info');
+      } else if (isCcFile) {
+        setSelectedCcFile(file);
+        addLog(`CC file selected: ${file.name}`, 'info');
+      } else {
+        addLog(`Unable to determine file type for: ${file.name}`, 'warning');
+      }
     }
   };
 
@@ -168,17 +176,17 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
       {/* Advanced settings toggle */}
       <div className="advanced-settings-toggle">
         <button 
-          className="btn btn-link" 
+          className="btn btn-link text-dark" 
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
           <i className={`bi bi-gear me-1`}></i>
           {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
         </button>
       </div>
-      
+
       {/* Advanced settings panel */}
       {showAdvanced && (
-        <div className="card mb-4">
+        <div className="card settings-card">
           <div className="card-header">
             <h5 className="mb-0">Advanced Settings</h5>
           </div>
@@ -217,209 +225,134 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
         </div>
       )}
       
-      <div className="row">
-        {/* IRA Upload */}
-        <div className="col-md-6">
-          <div className="card upload-card">
-            <div className="card-header bg-primary text-white">
-              <h5 className="mb-0">Upload IRA Data</h5>
-            </div>
-            <div className="card-body">
-              <div 
-                className={`file-drop-area ${dragging ? 'dragging' : ''}`}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragging(false);
-                  const files = e.dataTransfer.files;
-                  if (files.length > 0) handleFileSelect(files[0], 'ira');
-                }}
-              >
-                {selectedIraFile ? (
-                  <div className="selected-file">
-                    <i className="bi bi-file-earmark-excel me-2"></i>
-                    <span>{selectedIraFile.name}</span>
-                    <button 
-                      className="btn btn-sm btn-outline-danger ms-2"
-                      onClick={() => {
-                        setSelectedIraFile(null);
-                        if (iraFileInputRef.current) {
-                          iraFileInputRef.current.value = '';
-                        }
-                      }}
-                    >
-                      <i className="bi bi-x"></i>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="drop-message">
-                    <i className="bi bi-cloud-upload display-4"></i>
-                    <p>Drag & drop your IRA Excel file here<br/>or click to browse</p>
-                  </div>
-                )}
-                <input 
-                  type="file" 
-                  className="file-input" 
-                  ref={iraFileInputRef}
-                  accept=".xlsx,.xls,.csv"
-                  onChange={(e) => {
-                    if (e.target.files.length > 0) {
-                      handleFileSelect(e.target.files[0], 'ira');
-                    }
-                  }}
-                />
-              </div>
-              
-              {(uploadProgress.ira > 0) && (
-                <div className="progress mt-3">
-                  <div 
-                    className={`progress-bar progress-bar-striped progress-bar-animated bg-primary`} 
-                    role="progressbar" 
-                    style={{width: `${uploadProgress.ira}%`}}
-                    aria-valuenow={uploadProgress.ira} 
-                    aria-valuemin="0" 
-                    aria-valuemax="100"
-                  >
-                    {uploadProgress.ira}%
-                  </div>
-                </div>
-              )}
-              
-              <div className="text-center mt-3">
-                <button 
-                  className="btn btn-primary px-4"
-                  disabled={!selectedIraFile || processing.ira}
-                  onClick={() => handleUpload('ira')}
-                >
-                  {processing.ira ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2"></span>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-upload me-2"></i>
-                      Upload IRA Data
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="card upload-card">
+        <div className="card-header">
+          <h5 className="mb-0 text-dark">Upload IRA & CC Data</h5>
         </div>
-        
-        {/* CC Upload */}
-        <div className="col-md-6">
-          <div className="card upload-card">
-            <div className="card-header bg-info text-white">
-              <h5 className="mb-0">Upload Cycle Count Data</h5>
-            </div>
-            <div className="card-body">
-              <div 
-                className={`file-drop-area ${dragging ? 'dragging' : ''}`}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragging(false);
-                  const files = e.dataTransfer.files;
-                  if (files.length > 0) handleFileSelect(files[0], 'cc');
-                }}
-              >
-                {selectedCcFile ? (
+        <div className="card-body">
+          <div 
+            className={`file-drop-area ${dragging ? 'dragging' : ''}`}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              handleFileSelect([...e.dataTransfer.files]);
+            }}
+            onClick={() => document.getElementById('fileInput').click()}
+          >
+            {selectedIraFile || selectedCcFile ? (
+              <div className="selected-files">
+                {selectedIraFile && (
                   <div className="selected-file">
-                    <i className="bi bi-file-earmark-excel me-2"></i>
-                    <span>{selectedCcFile.name}</span>
+                    <i className="file-icon bi bi-file-earmark-excel"></i>
+                    <span className="file-name">{selectedIraFile.name}</span>
                     <button 
-                      className="btn btn-sm btn-outline-danger ms-2"
-                      onClick={() => {
-                        setSelectedCcFile(null);
-                        if (ccFileInputRef.current) {
-                          ccFileInputRef.current.value = '';
-                        }
+                      className="remove-file btn btn-sm btn-outline-danger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedIraFile(null);
                       }}
                     >
                       <i className="bi bi-x"></i>
                     </button>
                   </div>
-                ) : (
-                  <div className="drop-message">
-                    <i className="bi bi-cloud-upload display-4"></i>
-                    <p>Drag & drop your CC Excel file here<br/>or click to browse</p>
+                )}
+                {selectedCcFile && (
+                  <div className="selected-file">
+                    <i className="file-icon bi bi-file-earmark-excel"></i>
+                    <span className="file-name">{selectedCcFile.name}</span>
+                    <button 
+                      className="remove-file btn btn-sm btn-outline-danger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCcFile(null);
+                      }}
+                    >
+                      <i className="bi bi-x"></i>
+                    </button>
                   </div>
                 )}
-                <input 
-                  type="file" 
-                  className="file-input" 
-                  ref={ccFileInputRef}
-                  accept=".xlsx,.xls,.csv"
-                  onChange={(e) => {
-                    if (e.target.files.length > 0) {
-                      handleFileSelect(e.target.files[0], 'cc');
-                    }
-                  }}
-                />
               </div>
-              
-              {(uploadProgress.cc > 0) && (
-                <div className="progress mt-3">
-                  <div 
-                    className={`progress-bar progress-bar-striped progress-bar-animated bg-info`} 
-                    role="progressbar" 
-                    style={{width: `${uploadProgress.cc}%`}}
-                    aria-valuenow={uploadProgress.cc} 
-                    aria-valuemin="0" 
-                    aria-valuemax="100"
-                  >
-                    {uploadProgress.cc}%
-                  </div>
-                </div>
-              )}
-              
-              <div className="text-center mt-3">
-                <button 
-                  className="btn btn-info px-4"
-                  disabled={!selectedCcFile || processing.cc}
-                  onClick={() => handleUpload('cc')}
+            ) : (
+              <div className="drop-message">
+                <i className="upload-icon bi bi-cloud-upload"></i>
+                <p className="upload-text">Drag & drop your IRA and CC Excel files here<br/>or click to browse</p>
+                <small className="upload-hint text-muted">Files should contain "IRA" or "CC" in their names</small>
+              </div>
+            )}
+            <input 
+              id="fileInput"
+              type="file"
+              className="file-input"
+              multiple
+              accept=".xlsx,.xls,.csv,.xlsb"
+              onChange={(e) => handleFileSelect([...e.target.files])}
+            />
+          </div>
+
+          {/* Progress bars */}
+          {uploadProgress.ira > 0 && (
+            <div className="progress-wrapper">
+              <div className="progress">
+                <div 
+                  className="progress-bar progress-bar-striped progress-bar-animated"
+                  style={{width: `${uploadProgress.ira}%`}}
+                  role="progressbar"
+                  aria-valuenow={uploadProgress.ira} 
+                  aria-valuemin="0" 
+                  aria-valuemax="100"
                 >
-                  {processing.cc ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2"></span>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-upload me-2"></i>
-                      Upload CC Data
-                    </>
-                  )}
-                </button>
+                  IRA: {uploadProgress.ira}%
+                </div>
               </div>
             </div>
+          )}
+          
+          {uploadProgress.cc > 0 && (
+            <div className="progress-wrapper">
+              <div className="progress">
+                <div 
+                  className="progress-bar progress-bar-striped progress-bar-animated"
+                  style={{width: `${uploadProgress.cc}%`}}
+                  role="progressbar"
+                  aria-valuenow={uploadProgress.cc} 
+                  aria-valuemin="0" 
+                  aria-valuemax="100"
+                >
+                  CC: {uploadProgress.cc}%
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Upload button */}
+          <div className="mt-3 text-center">
+            <button 
+              type="button"
+              className="btn btn-dark px-4"
+              disabled={(!selectedIraFile && !selectedCcFile) || processing.ira || processing.cc}
+              onClick={() => {
+                if (selectedIraFile) handleUpload('ira');
+                if (selectedCcFile) handleUpload('cc');
+              }}
+            >
+              {(processing.ira || processing.cc) ? (
+                <>
+                  <span className="spinner-border spinner-border-sm"></span>
+                  <span className="ms-2">Processing...</span>
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-upload"></i>
+                  <span className="ms-2">Upload Files</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Upload both files at once button */}
-      {selectedIraFile && selectedCcFile && (
-        <div className="row mt-3">
-          <div className="col-12 text-center">
-            <button 
-              className="btn btn-success px-5"
-              disabled={processing.ira || processing.cc}
-              onClick={() => {
-                handleUpload('ira');
-                handleUpload('cc');
-              }}
-            >
-              <i className="bi bi-cloud-upload me-2"></i>
-              Upload Both Files
-            </button>
-          </div>
-        </div>
-      )}
-      
       {/* Log container */}
       <div className="row mt-4">
         <div className="col-12">

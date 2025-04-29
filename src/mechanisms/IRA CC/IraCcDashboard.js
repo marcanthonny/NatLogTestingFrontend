@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types'; // Add this import
 import * as XLSX from 'xlsx';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
 
 const VALID_BRANCHES = [
   '1982 - PT. APL JAYAPURA',
@@ -36,7 +38,7 @@ const getBranchShortName = (fullName) => {
   return fullName;
 };
 
-export const useIraCcDashboardLogic = ({ iraData, ccData, snapshotInfo }) => {
+export const useIraCcDashboardLogic = ({ iraData, ccData, snapshotInfo, onError }) => { // Add onError param
   const [iraStats, setIraStats] = useState({
     counted: 0,
     notCounted: 0,
@@ -542,102 +544,224 @@ const normalizeSnapshotData = (snapshot) => {
     }
   }, [iraData, ccData, snapshotInfo]);
 
-  const exportAsExcel = () => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const combinedData = [
-        ['No.', 'Branch', 'IRA %', 'IRA Status', 'CC %', 'CC Status']
+const exportAsExcel = async () => {
+  try {
+    const workbook = XLSX.utils.book_new();
+    
+    // Create the main performance worksheet
+    const performanceData = [
+      ['Branch', 'IRA %', 'IRA Status', 'CC %', 'CC Status']
+    ];
+    
+    // Get branch data and sort by CC percentage (descending)
+    const branchData = VALID_BRANCHES.map((branch) => {
+      const iraBranch = iraStats.branchPercentages.find(b => b.branch === branch);
+      const ccBranch = ccStats.branchPercentages.find(b => b.branch === branch);
+      
+      return {
+        branch: branch,
+        branchName: `PT. APL ${getBranchShortName(branch)}`,
+        iraPercentage: iraBranch?.percentage || 0,
+        ccPercentage: ccBranch?.percentage || 0,
+        iraStatus: iraBranch?.percentage >= currentWeek?.ira?.target ? 'On Target' : 'Below Target',
+        ccStatus: ccBranch?.percentage >= currentWeek?.cc?.target ? 'On Target' : 'Below Target'
+      };
+    }).sort((a, b) => b.ccPercentage - a.ccPercentage); // Sort by CC percentage
+
+    // Add sorted data to performance sheet
+    branchData.forEach(item => {
+      performanceData.push([
+        item.branchName,
+        item.iraPercentage.toFixed(2),
+        item.iraStatus,
+        item.ccPercentage.toFixed(2), 
+        item.ccStatus
+      ]);
+    });
+
+    // Create main performance worksheet
+    const performanceWS = XLSX.utils.aoa_to_sheet(performanceData);
+    
+    // If we have snapshot data, create a historical data worksheet
+    if (snapshotInfo) {
+      const historicalData = [
+        ['Snapshot Overview'],
+        ['Name', snapshotInfo.name],
+        ['Date', new Date(snapshotInfo.date).toLocaleDateString()],
+        [''],
+        ['Overall Statistics'],
+        ['', 'IRA', 'CC'],
+        ['Total Items', `${snapshotInfo.iraStats.counted + snapshotInfo.iraStats.notCounted}`, `${snapshotInfo.ccStats.counted + snapshotInfo.ccStats.notCounted}`],
+        ['Counted', snapshotInfo.iraStats.counted, snapshotInfo.ccStats.counted],
+        ['Not Counted', snapshotInfo.iraStats.notCounted, snapshotInfo.ccStats.notCounted],
+        ['Overall %', `${snapshotInfo.iraStats.percentage.toFixed(2)}%`, `${snapshotInfo.ccStats.percentage.toFixed(2)}%`],
+        [''],
+        ['Branch Percentages'],
+        ['Branch', 'IRA %', 'CC %']
       ];
 
-      const branchesWithData = VALID_BRANCHES.map((branch, index) => {
-        const iraBranch = iraStats.branchPercentages.find(b => b.branch === branch);
-        const ccBranch = ccStats.branchPercentages.find(b => b.branch === branch);
+      // Combine and sort branch percentages
+      const branches = new Set([
+        ...snapshotInfo.iraStats.branchPercentages.map(b => b.branch),
+        ...snapshotInfo.ccStats.branchPercentages.map(b => b.branch)
+      ]);
 
-        return {
-          no: index + 1,
-          branch,
-          ira: iraBranch ? iraBranch.percentage : 0,
-          cc: ccBranch ? ccBranch.percentage : 0
-        };
-      })
-      .sort((a, b) => b.cc - a.cc);
-
-      branchesWithData.forEach(branch => {
-        const iraStatus = currentWeek?.ira 
-          ? (branch.ira >= currentWeek.ira.target ? 'On Target' : 'Below Target')
-          : '';
-        const ccStatus = currentWeek?.cc 
-          ? (branch.cc >= currentWeek.cc.target ? 'On Target' : 'Below Target')
-          : '';
-
-        combinedData.push([
-          branch.no,
-          branch.branch,
-          `${branch.ira.toFixed(2)}%`,
-          iraStatus,
-          `${branch.cc.toFixed(2)}%`,
-          ccStatus
+      [...branches].sort().forEach(branch => {
+        const iraData = snapshotInfo.iraStats.branchPercentages.find(b => b.branch === branch);
+        const ccData = snapshotInfo.ccStats.branchPercentages.find(b => b.branch === branch);
+        
+        historicalData.push([
+          getBranchShortName(branch),
+          iraData ? iraData.percentage.toFixed(2) : 'N/A',
+          ccData ? ccData.percentage.toFixed(2) : 'N/A'
         ]);
       });
 
-      const ws = XLSX.utils.aoa_to_sheet(combinedData);
-      XLSX.utils.book_append_sheet(wb, ws, 'Combined Report');
-      XLSX.writeFile(wb, 'ira-cc-dashboard.xlsx');
-    } catch (error) {
-      console.error('Error exporting dashboard as Excel:', error);
-      alert('Failed to export as Excel. Please try again.');
-    }
-  };
+      // Create historical worksheet with formatting
+      const historicalWS = XLSX.utils.aoa_to_sheet(historicalData);
+      
+      // Set column widths
+      historicalWS['!cols'] = [
+        { wch: 25 }, // Branch names
+        { wch: 12 }, // IRA %
+        { wch: 12 }  // CC %
+      ];
 
-  const createEmailDraft = async () => {
-    try {
-      if (!snapshotInfo && (!iraData || !ccData)) {
-        setError('No data available to create email draft');
-        return;
-      }
-  
-      setLoading(true);
-  
-      if (snapshotInfo) {
-        const response = await axios.post('/api/snapshots/email-draft', {
-          snapshotId: snapshotInfo.id
-        });
-        
-        if (response.data.emailUrl) {
-          window.open(response.data.emailUrl, '_blank');
-        } else {
-          throw new Error('No email URL received from server');
-        }
-      } else {
-        const snapshot = {
-          id: Date.now().toString(),
-          name: `Snapshot ${new Date().toLocaleDateString()}`,
-          date: new Date().toISOString(),
-          iraStats: iraStats,
-          ccStats: ccStats
-        };
-  
-        const saveResponse = await axios.post('/api/snapshots', snapshot);
-        
-        const emailResponse = await axios.post('/api/snapshots/email-draft', {
-          snapshotId: saveResponse.data.id
-        });
-  
-        if (emailResponse.data.emailUrl) {
-          window.open(emailResponse.data.emailUrl, '_blank');
-        } else {
-          throw new Error('No email URL received from server');
-        }
-      }
-  
-      setSuccess('Email draft created successfully');
-    } catch (error) {
-      console.error('Error creating email draft:', error);
-      setError('Failed to create email draft: ' + (error.response?.data?.error || error.message));
-    } finally {
-      setLoading(false);
+      // Add to workbook
+      XLSX.utils.book_append_sheet(workbook, historicalWS, 'Historical Data');
     }
-  };
+
+    // ...existing column width and styling code for performanceWS...
+
+    // Add performance sheet last so it shows first when opened
+    XLSX.utils.book_append_sheet(workbook, performanceWS, 'Branch Performance');
+
+    // Save file with modified name if from snapshot
+    const fileName = snapshotInfo 
+      ? `IRA_CC_Report_${snapshotInfo.name}_${new Date(snapshotInfo.date).toISOString().split('T')[0]}.xlsx`
+      : `IRA_CC_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+    
+    XLSX.writeFile(workbook, fileName);
+    return fileName;
+
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    onError('Failed to export Excel file');
+  }
+};
+
+const formatWeekMonth = (date, weekNum) => {
+  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 
+                 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  // Format weekNum to remove 'week' prefix and make it look cleaner
+  const cleanWeekNum = weekNum.replace(/^week/i, '').trim();
+  return `Week ${cleanWeekNum} ${month} ${year}`;
+};
+
+const formatFullDate = (date) => {
+  const day = date.getDate();
+  const month = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 
+                'Agustus', 'September', 'Oktober', 'November', 'Desember'][date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} ${month} ${year}`;
+};
+
+const createEmailDraft = async () => {
+  try {
+    const templates = await import('../../config/emailTemplates.json');
+    const template = templates.default.iracc_report;
+
+    const today = new Date();
+    const weekNumber = currentWeek?.cc?.week?.replace(/^week/i, '').trim() || '1';
+    const weekFormatted = formatWeekMonth(today, weekNumber);
+    const dateFormatted = formatFullDate(today);
+    const timeFormatted = today.toLocaleTimeString('id-ID', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
+    const monthYear = today.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+    const targetPercentage = currentWeek?.cc?.target || 99;
+
+    // Sort branches by CC percentage descending
+    const sortedBranches = [...VALID_BRANCHES].sort((a, b) => {
+      const ccA = ccStats.branchPercentages.find(bp => bp.branch === a)?.percentage || 0;
+      const ccB = ccStats.branchPercentages.find(bp => bp.branch === b)?.percentage || 0;
+      return ccB - ccA;
+    });
+
+    // Generate branch performance table rows
+    const branchRows = sortedBranches.map((branch) => {
+      const iraBranch = iraStats.branchPercentages.find(b => b.branch === branch);
+      const ccBranch = ccStats.branchPercentages.find(b => b.branch === branch);
+      const iraPercentage = iraBranch?.percentage?.toFixed(2) || '0.00';
+      const ccPercentage = ccBranch?.percentage?.toFixed(2) || '0.00';
+      const iraStatus = Number(iraPercentage) >= (currentWeek?.ira?.target || 99) ? 'On Target' : 'Below Target';
+      const ccStatus = Number(ccPercentage) >= (currentWeek?.cc?.target || 99) ? 'On Target' : 'Below Target';
+      const iraColor = iraStatus === 'On Target' ? '#008000' : '#FF0000';
+      const ccColor = ccStatus === 'On Target' ? '#008000' : '#FF0000';
+
+      return template.tableRow
+        .replace('{branch}', getBranchShortName(branch))
+        .replace('{iraPercentage}', iraPercentage)
+        .replace('{iraStatus}', iraStatus)
+        .replace('{iraColor}', iraColor)
+        .replace('{ccPercentage}', ccPercentage)
+        .replace('{ccStatus}', ccStatus)
+        .replace('{ccColor}', ccColor);
+    }).join('');
+
+    // Create email subject and body
+    const emailSubject = template.subject
+      .replace('{weekFormatted}', weekFormatted)
+      .replace('{dateFormatted}', dateFormatted);
+
+    const emailBody = template.greeting + '\n\n' +
+      template.body
+        .replace(/{weekFormatted}/g, weekFormatted)
+        .replace(/{dateFormatted}/g, dateFormatted)
+        .replace('{timeFormatted}', timeFormatted)
+        .replace('{targetPercentage}', targetPercentage)
+        .replace('{monthYear}', monthYear) +
+      '\n\n' + template.summary.replace('{weekFormatted}', weekFormatted) +
+      '\n\n' + template.table.replace('{branchRows}', branchRows) +
+      template.overall
+        .replace('{iraPercentage}', iraStats.percentage.toFixed(2))
+        .replace('{ccPercentage}', ccStats.percentage.toFixed(2)) +
+      template.note +
+      template.closing;
+
+    // Remove HTML entities and create proper line breaks
+    const cleanedBody = emailBody
+      .replace(/(<br\s*\/?>)/gi, '\n')  // Convert <br> tags to newlines
+      .replace(/<\/?[^>]+(>|$)/g, '')   // Remove all other HTML tags
+      .replace(/&nbsp;/g, ' ')          // Convert &nbsp; to spaces
+      .replace(/&amp;/g, '&')           // Convert &amp; to &
+      .replace(/&lt;/g, '<')            // Convert &lt; to <
+      .replace(/&gt;/g, '>')            // Convert &gt; to >
+      .trim();                          // Remove extra whitespace
+
+    // Create a more reliable mailto link
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(cleanedBody)}`;
+
+    // Try opening with mailto first
+    window.location.href = mailtoLink;
+
+    // Fallback to Outlook Web if mailto doesn't work
+    setTimeout(() => {
+      const outlookLink = `https://outlook.office.com/mail/0/deeplink/compose?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(cleanedBody)}`;
+      window.open(outlookLink, '_blank');
+    }, 1000);
+
+    return true;
+  } catch (error) {
+    console.error('Error creating email draft:', error);
+    onError('Failed to create email draft');
+    return false;
+  }
+};
 
   const handleSaveSettings = async (settings) => {
     try {
@@ -659,7 +783,7 @@ const normalizeSnapshotData = (snapshot) => {
       return true;
     } catch (error) {
       console.error('Error saving week settings:', error);
-      setError('Failed to save week settings: ' + error.message);
+      onError('Failed to save week settings: ' + error.message); // Use passed onError
       return false;
     } finally {
       setLoading(false);
@@ -679,10 +803,12 @@ const normalizeSnapshotData = (snapshot) => {
     handleSaveSettings,  // Add this to the return object
     logs,
     addLog,
+    onError // Add this to return object
   };
 };
 
-const IraCcDashboard = ({ iraData, ccData, snapshotInfo }) => {
+function IraCcDashboard({ iraData, ccData, snapshotInfo, onError }) { // Add onError prop
+  const { translate } = useLanguage();
   const {
     iraStats,
     ccStats,
@@ -696,13 +822,38 @@ const IraCcDashboard = ({ iraData, ccData, snapshotInfo }) => {
     handleSaveSettings,
     logs,
     addLog,
-  } = useIraCcDashboardLogic({ iraData, ccData, snapshotInfo });
+  } = useIraCcDashboardLogic({ iraData, ccData, snapshotInfo, onError }); // Pass onError here
   
   return (
-    <div className="cms-dashboard-container">
-      {/* Content will come from interfaces/IraCcComponents/IraCcDashboard.jsx */}
+    <div className="dashboard-container">
+      {error && (
+        <div className="alert alert-danger">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          {translate('common.error')}: {error}
+        </div>
+      )}
+
+      <div className="row">
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-header">
+              <h5>{translate('dashboard.iraStats')}</h5>
+            </div>
+            {/* ...rest of the IRA stats... */}
+          </div>
+        </div>
+        {/* ...rest of the dashboard... */}
+      </div>
     </div>
   );
+}
+
+// Add prop types if using prop-types
+IraCcDashboard.propTypes = {
+  iraData: PropTypes.object,
+  ccData: PropTypes.object,
+  snapshotInfo: PropTypes.object,
+  onError: PropTypes.func.isRequired
 };
 
 export default IraCcDashboard;

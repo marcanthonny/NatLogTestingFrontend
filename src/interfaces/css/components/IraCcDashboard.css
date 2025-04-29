@@ -10,7 +10,6 @@
 }
 .dashboard-container table {
   margin-bottom: 30px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 .dashboard-container th {
   background-color: #f8f9fa;
@@ -23,11 +22,10 @@
 }
 .dashboard-container button {
   margin: 0 10px;
-  padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #000000;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 0px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -68,6 +66,8 @@
 
 .cms-dashboard-container {
   padding: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 .cms-dashboard-container .card-header {
   font-weight: 500;
@@ -100,6 +100,24 @@
 
 .card {
   margin-bottom: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: #fff;
+  padding: 1rem;
+}
+
+.card-header h5, 
+.card-header h6 {
+  margin: 0;
+  color: #ffffff;
+}
+
+.card-body {
+  padding: 1.25rem;
 }
 
 /* Export button styles */
@@ -130,6 +148,7 @@
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
 }
 
 .data-source-selector {
@@ -141,6 +160,7 @@
 .data-source-selector .btn-group {
   width: 100%;
   max-width: 400px;
+  margin-bottom: 0;
 }
 
 .data-source-selector .btn {
@@ -194,69 +214,45 @@
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 10px;
+    padding: 15px 10px;
   }
 
-  .cms-dashboard-container {
-    padding: 10px;
+  .data-selector-mobile {
+    margin-bottom: 1rem;
+    width: 100%;
   }
 
-  .card-header {
+  .weekDesktop {
+    display: none !important;
+  }
+
+  .data-selector-mobile select {
+    width: 100%;
     padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
   }
 
-  .card-body {
-    padding: 0.75rem;
+  .data-table-section {
+    display: none;
   }
 
-  .row [class^="col-"] {
+  .data-table-section.active {
+    display: block;
+  }
+
+  .dashboard-controls {
     margin-bottom: 1rem;
   }
 
-  .export-buttons {
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-
-  .export-buttons .btn {
-    width: 100%;
-  }
-
-  .btn-group {
-    width: 100%;
-    display: flex;
-  }
-
-  .btn-group .btn {
-    flex: 1;
-  }
-
-  .table-responsive {
-    max-height: 300px;
-    font-size: 0.875rem;
-  }
-
-  .progress {
-    height: 1rem;
-  }
-
-  .col-md-6 {
-    margin-bottom: 1rem;
-  }
-
-  .data-source-selector {
-    padding: 0.25rem;
-  }
-
-  .data-source-selector .btn-group {
-    flex-direction: column;
-  }
-
-  .data-source-selector .btn {
-    margin-bottom: 0.25rem;
-  }
 }
 
 @media (max-width: 576px) {
@@ -267,5 +263,158 @@
 
   .card-deck {
     flex-direction: column;
+  }
+}
+
+/* Card Styling */
+.card {
+  border-radius: 8px;
+  border: 1px solid rgb(230, 230, 230);
+  margin-bottom: 1rem;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: #fff;
+  padding: 1rem;
+}
+
+.card-header h5, 
+.card-header h6 {
+  margin: 0;
+  color: #333;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+/* Progress Bars */
+.progress {
+  height: 1.5rem;
+  border-radius: 0.75rem;
+  margin: 0.5rem 0;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  transition: width 0.6s ease;
+  border-radius: 0.75rem;
+}
+
+/* Tables */
+.table-responsive {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+}
+
+.table td, 
+.table th {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+/* Status Badges */
+.badge {
+  padding: 0.5em 0.75em;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+/* Summary Cards */
+.bg-light {
+  background-color: #ffffff !important;
+  border: 1px solid black;
+}
+
+/* Button Group */
+.btn-group {
+  margin-bottom: 1.5rem;
+}
+
+.btn-group .btn {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+
+/* Log Container */
+.log-container {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.log-entry {
+  margin: 4px 0;
+  padding: 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+/* Progress Colors */
+.bg-success {
+  background-color: #0029af !important;
+}
+
+.bg-danger {
+  background-color: #94000f !important;
+}
+
+.bg-warning {
+  background-color: #a37a00 !important;
+}
+
+/* Text Colors */
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+/* Data Source Selector */
+.data-source-selector {
+  margin-bottom: 1rem;
+}
+
+.data-source-selector .btn-group {
+  margin-bottom: 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .cms-dashboard-container {
+    padding: 10px;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .btn-group {
+    width: 100%;
+    display: flex;
+  }
+
+  .btn-group .btn {
+    flex: 1;
   }
 }

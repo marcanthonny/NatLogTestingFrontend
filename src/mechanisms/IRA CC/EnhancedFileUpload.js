@@ -352,6 +352,7 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
   const processCcData = (result) => {
     addLog('Auto-processing CC data to calculate percentages...', 'info');
     const processed = {...result};
+    let updates = 0;
     
     // Add %CountComp column if not present
     if (!processed.columns.includes('%CountComp')) {
@@ -362,22 +363,33 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
     processed.data = processed.data.map(row => {
       const processedRow = {...row};
       
-      // Check if we already have the %CountComp column with a value
-      if (processedRow['%CountComp'] === 1 || processedRow['%CountComp'] === 0) {
-        return processedRow;
-      }
-      
-      // Check if Count Status is "Counted"
-      if (processedRow['Count Status'] === 'Counted') {
+      // Enhanced logic to check for counted status
+      const isCounted = 
+        // Check existing %CountComp value
+        processedRow['%CountComp'] === 1 || 
+        processedRow['%CountComp'] === '1' || 
+        processedRow['%CountComp'] === true ||
+        // Check Count Status variations
+        processedRow['Count Status'] === 'Counted' ||
+        processedRow['Count Status'] === 'COUNTED' ||
+        processedRow['Count Status'] === 'Y' ||
+        // Check if Qty Counted exists and is greater than 0
+        (processedRow['Qty Counted'] && parseFloat(processedRow['Qty Counted']) > 0) ||
+        // Check Count Date exists
+        processedRow['Count Date'];
+
+      if (isCounted) {
         processedRow['%CountComp'] = 1;
+        updates++;
       } else {
         processedRow['%CountComp'] = 0;
+        updates++;
       }
       
       return processedRow;
     });
     
-    addLog(`CC data processed: Added %CountComp column with percentage values`, 'success');
+    addLog(`CC data processed: Updated ${updates} %CountComp values based on counting status`, 'success');
     return processed;
   };
 

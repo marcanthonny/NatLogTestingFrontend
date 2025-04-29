@@ -4,6 +4,7 @@ import { Chart, registerables } from 'chart.js';
 import axios from 'axios';
 import '../../interfaces/css/components/ComprehensiveDashboard.css';
 import { WEEKLY_CONFIG, getWeekForDate } from '../../config/weeklyConfig';
+import { fetchAllSnapshots, fetchSnapshotById } from '../../utils/databaseUtils';
 
 // Register ChartJS components
 Chart.register(...registerables);
@@ -55,15 +56,13 @@ function ComprehensiveDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('/api/snapshots');
-      // Sort snapshots by date (oldest to newest)
-      const sortedSnapshots = response.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const snapshots = await fetchAllSnapshots();
+      const sortedSnapshots = snapshots.sort((a, b) => new Date(a.date) - new Date(b.date));
       setWeeklySnapshots(sortedSnapshots);
-      // Fetch detailed data for each snapshot
       await loadDetailedSnapshots(sortedSnapshots);
     } catch (error) {
       console.error('Error loading weekly snapshots:', error);
-      setError('Failed to load snapshots. Please try again later.');
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -78,20 +77,8 @@ function ComprehensiveDashboard() {
       
       for (const snapshot of recentSnapshots) {
         try {
-          const response = await axios.get(`/api/snapshots/${snapshot.id}`);
-          // Transform simple percentages into stats structure if needed
-          const transformedData = {
-            ...response.data,
-            iraStats: response.data.iraStats || {
-              percentage: response.data.iraPercentage,
-              branchPercentages: [] // Add empty branch percentages if not available
-            },
-            ccStats: response.data.ccStats || {
-              percentage: response.data.ccPercentage,
-              branchPercentages: [] // Add empty branch percentages if not available
-            }
-          };
-          detailedData.push(transformedData);
+          const detailedSnapshot = await fetchSnapshotById(snapshot.id);
+          detailedData.push(detailedSnapshot);
         } catch (err) {
           // If detailed fetch fails, use the summary data
           const transformedData = {

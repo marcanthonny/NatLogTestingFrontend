@@ -195,6 +195,24 @@ th:hover .column-checkbox {
   .data-type-selector {
     width: 100%;
     margin-bottom: 1rem;
+    flex-direction: column;
+  }
+
+  .data-type-selector .input-group {
+    flex-direction: column;
+  }
+
+  .data-type-selector .input-group-text {
+    border-radius: 0.25rem 0.25rem 0 0;
+  }
+
+  .data-type-selector .form-select {
+    border-radius: 0 0 0.25rem 0.25rem;
+  }
+
+  .excel-like-table {
+    margin: 0 -0.75rem;
+    width: calc(100% + 1.5rem);
   }
 
   .action-buttons .btn-group {
@@ -226,6 +244,33 @@ th:hover .column-checkbox {
   .selection-helper {
     bottom: 10px;
     right: 10px;
+    left: 10px;
+    text-align: center;
     font-size: 0.8rem;
+  }
+
+  .controls-section {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .filter-group,
+  .sort-group {
+    width: 100%;
+  }
+
+  .data-table-wrapper {
+    margin: 0 -10px;
+    width: calc(100% + 20px);
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .page-size-selector {
+    width: 100%;
   }
 }

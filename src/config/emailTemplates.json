@@ -1,0 +1,13 @@
+{
+  "iracc_report": {
+    "subject": "IRA & Cycle Count {weekFormatted} (as per {dateFormatted})",
+    "greeting": "Dear Bapak/Ibu di Cabang,",
+    "body": "<div style='font-family: Verdana, sans-serif; font-size: 9pt;'><b>Subject: IRA & Cycle Count {weekFormatted} (as per {dateFormatted})</b><br><br>Terkait dengan data IRA dan Cycle Count untuk {weekFormatted}, telah dilakukan penarikan data dari Power BI Dashboard pada tanggal {dateFormatted} Jam {timeFormatted} WIB.<br><br>Terima Kasih kepada cabang yang telah memenuhi target per minggu IRA/CC pada minggu sebelumnya dan mohon kepada Bapak yang belum mencapai target cycle count untuk dapat memonitor agar cycle count dapat terpenuhi pada {weekFormatted} karena masih berada di bawah angka {targetPercentage}%.<br><br>Terimakasih kepada Bapak/Ibu Dengan IRA yang tidak ada dibawah 99%.<br><br>Berikut telah dilampirkan data IRA dan Cycle Count per tarikan tanggal {dateFormatted} yang dapat digunakan sebagai evaluasi IRA dan Cycle Count untuk bulan {monthYear}.</div>",
+    "summary": "Summary for {weekFormatted}:",
+    "table": "<table border='1' cellpadding='3' cellspacing='0' style='border-collapse: collapse; font-family: Verdana, sans-serif; font-size: 9pt;'><tr style='background-color: #f0f0f0'><th>Branch</th><th>IRA %</th><th>IRA Status</th><th>CC %</th><th>CC Status</th></tr>{branchRows}</table>",
+    "tableRow": "<tr><td>{branch}</td><td align='right'>{iraPercentage}%</td><td align='center' style='color: {iraColor}'>{iraStatus}</td><td align='right'>{ccPercentage}%</td><td align='center' style='color: {ccColor}'>{ccStatus}</td></tr>",
+    "overall": "<br><div style='font-family: Verdana, sans-serif; font-size: 9pt;'><b>Overall Performance:</b><br>- IRA: {iraPercentage}%<br>- CC: {ccPercentage}%</div>",
+    "note": "<br><div style='font-family: Verdana, sans-serif; font-size: 9pt;'><i>Please review the attached Excel report for detailed branch performance.</i></div>",
+    "closing": "<br><div style='font-family: Verdana, sans-serif; font-size: 9pt;'>Best regards,<br>Terima kasih</div>"
+  }
+}

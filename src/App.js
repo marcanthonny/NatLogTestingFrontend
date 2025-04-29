@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from './mechanisms/General/LanguageContext';
 import './interfaces/css/App.css';
 import './interfaces/css/Dashboard.css';
 // Fix imports to use correct paths and exports
@@ -8,18 +9,21 @@ import FormulaBuilder from './mechanisms/Excel Editor/FormulaBuilder';
 import ColumnFormatter from './mechanisms/Excel Editor/ColumnFormatter';
 import FilterPanel from './mechanisms/Excel Editor/FilterPanel';
 import ToolBar from './mechanisms/Excel Editor/ToolBar';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import TopNav from './interfaces/generals/TopNav.jsx';
 import UndoRedo from './interfaces/generals/UndoRedo';
 import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
 import DataView from './mechanisms/IRA CC/DataView';
 import AnalyzeComponent from './mechanisms/IRA CC/AnalyzeComponent';
 import HistoricalDataComponent from './mechanisms/IRA CC/HistoricalDataComponent';
 import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
-import { LanguageProvider } from './mechanisms/General/LanguageContext';
 import ExcelEditor from './interfaces/ExcelEditor/ExcelEditor';
+import Login from './interfaces/Auth/Login.jsx';
+import { getAuthToken, setAuthToken } from './utils/authUtils';
+import axiosInstance from './utils/axiosConfig';
 
 function App() {
+  const { translate } = useLanguage();
+
   // IRA CC states
   const [iraData, setIraData] = useState(null);
   const [ccData, setCcData] = useState(null);
@@ -119,6 +123,15 @@ function App() {
     // Clear any stored data
     clearExcelData();
   }, []); // Empty dependency array means this runs once on mount
+
+  useEffect(() => {
+    // Check for token on app load
+    const token = getAuthToken();
+    if (token) {
+      setAuthToken(token);
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   const handleIraData = (data) => {
     // Ensure data is properly structured
@@ -336,33 +349,43 @@ function App() {
   };
 
   // When uploading or editing the file, update excelData here
-  const handleExcelDataChange = (newData) => {
-    setExcelData(newData);
-    // Also save to localStorage
+  const handleExcelDataChange = async (newData) => {
     try {
-      localStorage.setItem('excelData', JSON.stringify(newData));
-    } catch (e) {
-      console.error('Failed to save Excel data:', e);
+      await axiosInstance.post('/excel/save', newData);
+      setExcelData(newData);
+      // Also save to localStorage
+      try {
+        localStorage.setItem('excelData', JSON.stringify(newData));
+      } catch (e) {
+        console.error('Failed to save Excel data:', e);
+      }
+    } catch (error) {
+      console.error('Failed to save Excel data:', error);
     }
   };
 
   // Add separate handler for Excel Editor data changes
-  const handleExcelEditorDataChange = (newData) => {
-    setExcelEditorData(newData);
+  const handleExcelEditorDataChange = async (newData) => {
     try {
-      localStorage.setItem('excelEditorData', JSON.stringify(newData));
-    } catch (e) {
-      console.error('Failed to save Excel Editor data:', e);
+      await axiosInstance.post('/excelEditor/save', newData);
+      setExcelEditorData(newData);
+      try {
+        localStorage.setItem('excelEditorData', JSON.stringify(newData));
+      } catch (e) {
+        console.error('Failed to save Excel Editor data:', e);
+      }
+    } catch (error) {
+      console.error('Failed to save Excel Editor data:', error);
     }
   };
 
   // Add Excel Editor to the available tabs
   const tabs = [
-    { id: 'upload', label: 'Upload Files', icon: 'bi-cloud-upload' },
-    { id: 'data', label: 'Data View', icon: 'bi-table' },
-    { id: 'dashboard', label: 'Dashboard', icon: 'bi-graph-up' },
-    { id: 'history', label: 'Historical Data', icon: 'bi-clock-history' },
-    { id: 'excelEditor', label: 'Excel Editor', icon: 'bi-file-earmark-spreadsheet' } // Add this line
+    { id: 'upload', label: translate('sidebar.upload'), icon: 'bi-cloud-upload' },
+    { id: 'data', label: translate('sidebar.dataView'), icon: 'bi-table' },
+    { id: 'dashboard', label: translate('sidebar.dashboard'), icon: 'bi-graph-up' },
+    { id: 'historical', label: translate('sidebar.historicalData'), icon: 'bi-clock-history' },
+    { id: 'excelEditor', label: 'Excel Editor', icon: 'bi-file-earmark-spreadsheet' }
   ];
 
   // Render content based on the active tab
@@ -388,6 +411,7 @@ function App() {
           ccData={ccData || selectedSnapshot?.ccData}
           isHistoricalView={!iraData && !ccData}
           snapshotInfo={selectedSnapshot}
+          onError={handleError} // Add this line
         />;
       case 'analyze':
         return <AnalyzeComponent 
@@ -432,66 +456,99 @@ function App() {
     localStorage.removeItem('excelEditorData');
   };
 
+  // Add isAuthenticated state at the top with other states
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
+
+  // Add auth state
+  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
+
+  useEffect(() => {
+    // Update axios token when it changes
+    if (authToken) {
+      localStorage.setItem('authToken', authToken);
+    } else {
+      localStorage.removeItem('authToken');
+    }
+  }, [authToken]);
+
+  // Keep only the final enhanced versions:
+  const handleLogout = () => {
+    setAuthToken(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated');
+    setActiveTab('upload');
+  };
+
+  const handleLogin = async (token) => {
+    if (token) {
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('isAuthenticated', 'true');
+      setAuthToken(token);
+      setIsAuthenticated(true);
+      setActiveTab('upload');
+    }
+  };
+
+  // Modify return statement to check authentication
   return (
-    <LanguageProvider value={{ language, toggleLanguage }}>
-      <div className="app-layout">
-        <Sidebar 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          hasData={!!(iraData || ccData)}
-          hasIraData={!!iraData}
-          hasCcData={!!ccData}
-        />
-        
-        <div className="main-content-wrapper">
-          <Header 
+    <>
+      {!isAuthenticated ? (
+        <Login onLogin={handleLogin} />
+      ) : (
+        <div className="app-layout">
+          <TopNav 
             activeTab={activeTab} 
-            excelData={iraData || ccData}
-            onLanguageToggle={toggleLanguage}
-            language={language}
+            setActiveTab={setActiveTab} 
+            hasData={!!(iraData || ccData)}
+            hasIraData={!!iraData}
+            hasCcData={!!ccData}
           />
           
-          <div className="main-content">
-            {/* Display success message */}
-            {success && (
-              <div className="alert alert-success mt-3">
-                <i className="bi bi-check-circle me-2"></i>
-                {success}
-              </div>
-            )}
-            
-            {/* Display error message */}
-            {error && (
-              <div className="alert alert-danger mt-3">
-                <i className="bi bi-exclamation-triangle me-2"></i>
-                Error: {error}
-              </div>
-            )}
-            
-            {renderContent()}
+          <div className="main-content-wrapper">
+            <div className="main-content">
+              {/* Display success message */}
+              {success && (
+                <div className="alert alert-success mt-3">
+                  <i className="bi bi-check-circle me-2"></i>
+                  {success}
+                </div>
+              )}
+              
+              {/* Display error message */}
+              {error && (
+                <div className="alert alert-danger mt-3">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  Error: {error}
+                </div>
+              )}
+              
+              {renderContent()}
+            </div>
           </div>
+          
+          {/* Hidden buttons for export functionality */}
+          <button 
+            id="exportDropdown" 
+            className="d-none"
+            onClick={() => {
+              const toolbarExport = document.querySelector('.dropdown-item[onClick*="xlsx"]');
+              if (toolbarExport) toolbarExport.click();
+            }}
+          ></button>
+          
+          <button 
+            id="exportDropdownCSV" 
+            className="d-none"
+            onClick={() => {
+              const toolbarExport = document.querySelector('.dropdown-item[onClick*="csv"]');
+              if (toolbarExport) toolbarExport.click();
+            }}
+          ></button>
         </div>
-        
-        {/* Hidden buttons for export functionality */}
-        <button 
-          id="exportDropdown" 
-          className="d-none"
-          onClick={() => {
-            const toolbarExport = document.querySelector('.dropdown-item[onClick*="xlsx"]');
-            if (toolbarExport) toolbarExport.click();
-          }}
-        ></button>
-        
-        <button 
-          id="exportDropdownCSV" 
-          className="d-none"
-          onClick={() => {
-            const toolbarExport = document.querySelector('.dropdown-item[onClick*="csv"]');
-            if (toolbarExport) toolbarExport.click();
-          }}
-        ></button>
-      </div>
-    </LanguageProvider>
+      )}
+    </>
   );
 }
 
