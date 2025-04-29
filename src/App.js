@@ -504,8 +504,9 @@ function App() {
             hasData={!!(iraData || ccData)}
             hasIraData={!!iraData}
             hasCcData={!!ccData}
+            onLogout={handleLogout}  // Add this line to pass the logout handler
           />
-          
+
           <div className="main-content-wrapper">
             <div className="main-content">
               {/* Display success message */}

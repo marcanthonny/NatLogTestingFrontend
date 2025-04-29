@@ -130,47 +130,62 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
         }
       };
     } else {
-      // Use week from current configuration
-      const today = new Date();
-      const weekSettings = JSON.parse(localStorage.getItem('weekTargetSettings') || '{}');
-      
-      const isInWeekRange = (week) => {
-        if (!week?.startDate || !week?.endDate) return false;
-        const start = new Date(week.startDate);
-        const end = new Date(week.endDate);
-        end.setHours(23, 59, 59, 999);
-        return today >= start && today <= end;
-      };
-
-      let currentIraWeek = null;
-      let currentCcWeek = null;
-
-      Object.entries(weekSettings.ira || {}).forEach(([week, settings]) => {
-        if (isInWeekRange(settings)) {
-          currentIraWeek = {
-            week: week.replace('week', 'Week '),
-            target: settings.target,
-            startDate: settings.startDate,
-            endDate: settings.endDate
+      try {
+        const weekSettings = JSON.parse(localStorage.getItem('weekTargetSettings') || '{}');
+        const today = new Date(); // Add today variable here
+        
+        // Add safety checks
+        if (!weekSettings || (!weekSettings.ira && !weekSettings.cc)) {
+          return {
+            ira: { week: 'Week 1', target: 99, startDate: null, endDate: null },
+            cc: { week: 'Week 1', target: 25, startDate: null, endDate: null }
           };
         }
-      });
+        
+        const isInWeekRange = (week) => {
+          if (!week?.startDate || !week?.endDate) return false;
+          const start = new Date(week.startDate);
+          const end = new Date(week.endDate);
+          end.setHours(23, 59, 59, 999);
+          return today >= start && today <= end;
+        };
 
-      Object.entries(weekSettings.cc || {}).forEach(([week, settings]) => {
-        if (isInWeekRange(settings)) {
-          currentCcWeek = {
-            week: week.replace('week', 'Week '),
-            target: settings.target,
-            startDate: settings.startDate,
-            endDate: settings.endDate
-          };
-        }
-      });
+        let currentIraWeek = null;
+        let currentCcWeek = null;
 
-      return {
-        ira: currentIraWeek,
-        cc: currentCcWeek
-      };
+        Object.entries(weekSettings.ira || {}).forEach(([week, settings]) => {
+          if (isInWeekRange(settings)) {
+            currentIraWeek = {
+              week: week.replace('week', 'Week '),
+              target: settings.target,
+              startDate: settings.startDate,
+              endDate: settings.endDate
+            };
+          }
+        });
+
+        Object.entries(weekSettings.cc || {}).forEach(([week, settings]) => {
+          if (isInWeekRange(settings)) {
+            currentCcWeek = {
+              week: week.replace('week', 'Week '),
+              target: settings.target,
+              startDate: settings.startDate,
+              endDate: settings.endDate
+            };
+          }
+        });
+
+        return {
+          ira: currentIraWeek,
+          cc: currentCcWeek
+        };
+      } catch (error) {
+        console.error('Error parsing week settings:', error);
+        return {
+          ira: { week: 'Week 1', target: 99, startDate: null, endDate: null },
+          cc: { week: 'Week 1', target: 25, startDate: null, endDate: null }
+        };
+      }
     }
   };
 
@@ -419,7 +434,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
 
         {/* Current Week Status Card - Desktop Only */}
         <div className="d-none d-md-block">
-          {currentWeek && (
+          {currentWeek && currentWeek.ira && currentWeek.cc && (
             <div className="card mb-4">
               <div className="card-header text-white">
                 <h5 className="mb-0">Active Week Status</h5>
@@ -607,7 +622,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
 
         {/* Mobile view - single table with conditional week display */}
         <div className="d-block d-md-none">
-          {currentWeek && (
+          {currentWeek && currentWeek.ira && currentWeek.cc && (
             <div className="card mb-4">
               <div className="card-header text-white">
                 <h5 className="mb-0">Active Week Status</h5>

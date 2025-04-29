@@ -47,7 +47,7 @@ function ColumnFormatter({ columns, data, onFormatApplied, onError, onSuccess })
 
   return (
     <div className="card mb-4">
-      <div className="card-header bg-info text-white d-flex justify-content-between align-items-center" 
+      <div className="card-header text-white d-flex justify-content-between align-items-center" 
            style={{backgroundColor: "#00385e !important"}}>
         <h5 className="mb-0">Column Format Converter</h5>
         <button 

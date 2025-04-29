@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../../interfaces/css/components/Login.css';
-import aplLogo from '../../images/apl-icon.png';
+import aplLogo from '../../images/apl-logo.png';
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -21,16 +21,16 @@ function Login({ onLogin }) {
   return (
     <div className="login-container">
       <div className="login-box">
-        <div className="text-center mb-4">
+        <div className="text-center">
           <img 
             src={aplLogo} 
             alt="APL Logo" 
             className="login-logo"
-            width="200"
+            width="auto"
             height="auto"
           />
         </div>
-        <h2>National Logistics Portal</h2>
+        <h3>Login to Continue</h3>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Username</label>

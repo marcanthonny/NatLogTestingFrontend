@@ -70,7 +70,7 @@ function FormulaBuilder({ columns, data, onFormulaApplied, onError, onSuccess })
 
   return (
     <div className="card mb-4">
-      <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center" 
+      <div className="card-header text-white d-flex justify-content-between align-items-center" 
            style={{backgroundColor: "#005e32 !important"}}>
         <h5 className="mb-0">If-Else Formula Builder</h5>
         <button 

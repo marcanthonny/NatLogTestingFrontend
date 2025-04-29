@@ -1,7 +1,7 @@
 /* ...existing code... */
 
 .login-logo {
-  max-width: 200px;
+  max-width: auto;
   height: auto;
   margin-bottom: 1.5rem;
 }
@@ -9,8 +9,7 @@
 .login-card {
   background: white;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid #000000;
   width: 100%;
   max-width: 400px;
 }
@@ -27,9 +26,9 @@
   background: white;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #000000;
   width: 100%;
-  max-width: 400px;
+  max-width: auto;
 }
 
 .login-box h2 {
@@ -59,7 +58,6 @@
 .form-control:focus {
   border-color: #005e32;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 94, 50, 0.25);
 }
 
 .btn-primary {
