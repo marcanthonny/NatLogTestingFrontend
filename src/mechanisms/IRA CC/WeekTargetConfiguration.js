@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Nav, Tab } from 'react-bootstrap';
+import '../../interfaces/css/components/WeekTargetConfiguration.css';
 import axios from 'axios';
 
 function WeekTargetConfiguration({ show, onHide, onUpdate }) {
@@ -81,11 +82,11 @@ function WeekTargetConfiguration({ show, onHide, onUpdate }) {
   };
 
   const renderWeekInputs = (type, week) => (
-    <div className="mb-4" key={week}>
+    <div className="week-section" key={week}>
       <h6>Week {week.replace('week', '')}</h6>
       <Form.Group className="mb-2">
         <Form.Label>Date Range</Form.Label>
-        <div className="d-flex gap-2 align-items-center">
+        <div className="date-range">
           <Form.Control
             type="date"
             value={targets[type][week].startDate}
@@ -102,6 +103,7 @@ function WeekTargetConfiguration({ show, onHide, onUpdate }) {
       <Form.Group>
         <Form.Label>Target Percentage</Form.Label>
         <Form.Control
+          className="target-input"
           type="number"
           min="0"
           max="100"
@@ -114,7 +116,7 @@ function WeekTargetConfiguration({ show, onHide, onUpdate }) {
   );
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Modal show={show} onHide={onHide} size="lg" className="week-config-modal">
       <Modal.Header closeButton>
         <Modal.Title>Configure Weekly Targets</Modal.Title>
       </Modal.Header>

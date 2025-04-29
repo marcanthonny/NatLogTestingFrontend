@@ -1,34 +1,103 @@
-// ...existing code...
+/* Base Modal Styling */
+.week-config-modal .modal-body {
+  padding: 1.5rem;
+}
 
-@media (max-width: 768px) {
-  .target-config-container {
-    padding: 10px;
-  }
+/* Tab Navigation */
+.week-config-modal .nav-tabs {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
 
-  .week-selector {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+.week-config-modal .nav-link {
+  color: #6c757d;
+  padding: 0.75rem 1rem;
+}
 
-  .date-range-picker {
-    width: 100%;
-  }
+.week-config-modal .nav-link.active {
+  color: #000;
+  font-weight: 500;
+}
 
-  .target-inputs {
-    flex-direction: column;
+/* Form Controls */
+.week-config-modal .form-control {
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem;
+}
+
+.week-config-modal .form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Week Section */
+.week-config-modal .week-section {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+/* Date Range Group */
+.week-config-modal .date-range {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Target Input */
+.week-config-modal .target-input {
+  width: 100px;
+}
+
+/* Modal Footer */
+.week-config-modal .modal-footer {
+  padding: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.week-config-modal .modal-footer .btn {
+  min-width: 100px;
+  margin: 0;  /* Reset any default margins */
+}
+
+/* Desktop Layout (≥768px) */
+@media (min-width: 768px) {
+  .week-config-modal .week-section {
+    display: flex;
+    align-items: flex-start;
     gap: 1rem;
   }
 
-  .target-input-group {
-    width: 100%;
+  .week-config-modal .form-group {
+    flex: 1;
+    margin-bottom: 0;
   }
 
-  .action-buttons {
+  .week-config-modal .target-input {
+    width: 100px;
+  }
+}
+
+/* Mobile Layout (<768px) */
+@media (max-width: 767px) {
+  .week-config-modal .week-section {
+    display: block;
+  }
+
+  .week-config-modal .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .week-config-modal .date-range {
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .action-buttons .btn {
+  .week-config-modal .target-input {
     width: 100%;
   }
 }

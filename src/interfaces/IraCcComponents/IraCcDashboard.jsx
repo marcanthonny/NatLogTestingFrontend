@@ -417,46 +417,48 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
           </div>
         </div>
 
-        {/* Current Week Status Card */}
-        {currentWeek && (
-          <div className="card mb-4">
-            <div className="card-header text-white">
-              <h5 className="mb-0">Active Week Status</h5>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-6">
-                  <div className="alert alert-primary mb-0">
-                    <h6 className="mb-2">IRA Week</h6>
-                    <strong>{currentWeek.ira?.week}</strong>
-                    <div className="mt-1">
-                      <small>Target: {currentWeek.ira?.target}%</small>
-                      {currentWeek.ira?.startDate && (
-                        <small className="d-block">
-                          {formatDate(currentWeek.ira.startDate)} - {formatDate(currentWeek.ira.endDate)}
-                        </small>
-                      )}
+        {/* Current Week Status Card - Desktop Only */}
+        <div className="d-none d-md-block">
+          {currentWeek && (
+            <div className="card mb-4">
+              <div className="card-header text-white">
+                <h5 className="mb-0">Active Week Status</h5>
+              </div>
+              <div className="card-body">
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="alert alert-primary mb-0">
+                      <h6 className="mb-2">IRA Week</h6>
+                      <strong>{currentWeek.ira.week}</strong>
+                      <div className="mt-1">
+                        <small>Target: {currentWeek.ira.target}%</small>
+                        {currentWeek.ira.startDate && (
+                          <small className="d-block">
+                            {formatDate(currentWeek.ira.startDate)} - {formatDate(currentWeek.ira.endDate)}
+                          </small>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="col-md-6">
-                  <div className="alert alert-info mb-0">
-                    <h6 className="mb-2">CC Week</h6>
-                    <strong>{currentWeek.cc?.week}</strong>
-                    <div className="mt-1">
-                      <small>Target: {currentWeek.cc?.target}%</small>
-                      {currentWeek.cc?.startDate && (
-                        <small className="d-block">
-                          {formatDate(currentWeek.cc.startDate)} - {formatDate(currentWeek.cc.endDate)}
-                        </small>
-                      )}
+                  <div className="col-md-6">
+                    <div className="alert alert-info mb-0">
+                      <h6 className="mb-2">CC Week</h6>
+                      <strong>{currentWeek.cc.week}</strong>
+                      <div className="mt-1">
+                        <small>Target: {currentWeek.cc.target}%</small>
+                        {currentWeek.cc.startDate && (
+                          <small className="d-block">
+                            {formatDate(currentWeek.cc.startDate)} - {formatDate(currentWeek.cc.endDate)}
+                          </small>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Desktop view - both tables */}
         <div className="weekDesktop d-none d-md-block">
@@ -603,9 +605,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
           </div>
         </div>
 
-        {/* Mobile view - single table */}
+        {/* Mobile view - single table with conditional week display */}
         <div className="d-block d-md-none">
-          {/* Week Status Card - Only show relevant section */}
           {currentWeek && (
             <div className="card mb-4">
               <div className="card-header text-white">
@@ -645,6 +646,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
             </div>
           )}
 
+          {/* Rest of mobile view content */}
           <div className={`data-table-section ${activeTable === 'ira' ? 'd-block' : 'd-none'}`}>
             {/* Mobile IRA Summary Card */}
             <div className="card mb-4">

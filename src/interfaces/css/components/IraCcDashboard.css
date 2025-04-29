@@ -21,7 +21,7 @@
   text-align: center;
 }
 .dashboard-container button {
-  margin: 0 10px;
+  margin-right: 10px;
   background-color: #000000;
   color: white;
   border: none;
