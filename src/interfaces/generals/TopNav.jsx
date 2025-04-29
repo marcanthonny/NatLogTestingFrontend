@@ -3,9 +3,30 @@ import { useLanguage } from '../../mechanisms/General/LanguageContext';
 import '../css/TopNav.css';
 
 function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLogout }) {
-  const { translate } = useLanguage();
+  const { translate } = useLanguage(); // Add this line to extract translate function
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Add resize listener
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setActiveGroup(null);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleGroup = (group) => {
+    if (isMobile) {
+      setActiveGroup(activeGroup === group ? null : group);
+    }
+  };
 
   const handleNavClick = (tab, e) => {
     e.preventDefault();
@@ -18,10 +39,6 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     setActiveGroup(null);
-  };
-
-  const toggleGroup = (group) => {
-    setActiveGroup(activeGroup === group ? null : group);
   };
 
   // Add scroll handling
@@ -74,7 +91,24 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
   return (
     <nav className="top-nav">
       <div className="nav-brand">
-        <img src="/images/apl-logo.png" alt="APL Logo" />
+        {/* Replace img with more robust implementation */}
+        <div className="logo-container">
+          <img 
+            src="https://natlogportal.vercel.app/apl-icon-32x32.png"
+            alt="APL Logo"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'block';
+            }}
+          />
+          <span 
+            className="logo-fallback" 
+            style={{ display: 'none', fontSize: '1.5rem', fontWeight: 'bold' }}
+          >
+            APL
+          </span>
+        </div>
       </div>
 
       <button 
