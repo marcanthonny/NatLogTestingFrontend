@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosConfig';
 import '../../interfaces/css/components/HistoricalDataComponent.css';
 import { getSnapshotStorageLocation, exportLocalSnapshots, importLocalSnapshots } from '../../utils/snapshotUtils';
 import { getApiUrl } from '../../config/api';
+import { deleteSnapshot, fetchSnapshotById } from '../../utils/databaseUtils';
 
 const VALID_BRANCHES = [
   '1982 - PT. APL JAYAPURA',
@@ -452,43 +453,6 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     };
   };
   
-  // Delete a snapshot - server-focused with minimal fallback
-  const deleteSnapshot = async (id) => {
-    if (window.confirm('Are you sure you want to delete this snapshot?')) {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        await axiosInstance.delete(`/snapshots/${id}`);
-        
-        // If successful, update local state immediately
-        setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
-        if (selectedSnapshot && selectedSnapshot.id === id) {
-          setSelectedSnapshot(null);
-        }
-        
-      } catch (error) {
-        console.error('Error deleting snapshot:', error);
-        
-        // Handle 404 Not Found specifically
-        if (error.response?.status === 404) {
-          // If snapshot is not found on server, remove it from local state
-          setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
-          if (selectedSnapshot && selectedSnapshot.id === id) {
-            setSelectedSnapshot(null);
-          }
-          setError("Snapshot was already deleted or doesn't exist. Local data has been updated.");
-        } else {
-          // Handle other errors
-          const errorMessage = error.response?.data?.message || error.message;
-          setError(`Failed to delete snapshot: ${errorMessage}. Please try again.`);
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-  
   // Format date for display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -496,41 +460,22 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
   };
   
   // View snapshot details with localStorage fallback
-  const viewSnapshot = async (snapshotInfo) => {
+  const handleViewSnapshot = async (snapshot) => {
     try {
-      // If snapshot details are already in the data, use them
-      if (snapshotInfo.iraStats && snapshotInfo.ccStats) {
-        const normalizedSnapshot = {
-          ...snapshotInfo,
-          iraStats: typeof snapshotInfo.iraStats === 'string' 
-            ? JSON.parse(snapshotInfo.iraStats) 
-            : snapshotInfo.iraStats,
-          ccStats: typeof snapshotInfo.ccStats === 'string'
-            ? JSON.parse(snapshotInfo.ccStats)
-            : snapshotInfo.ccStats
-        };
-  
-        setSelectedSnapshot(normalizedSnapshot);
-        if (onSnapshotSelect) {
-          onSnapshotSelect(normalizedSnapshot);
-        }
-        return;
-      }
-  
-      // Otherwise fetch from server
-      const response = await axiosInstance.get(`/snapshots/${snapshotInfo.id}`);
-      const fullSnapshot = response.data;
-  
+      setLoading(true);
+      const fullSnapshot = await fetchSnapshotById(snapshot.id);
       setSelectedSnapshot(fullSnapshot);
       if (onSnapshotSelect) {
         onSnapshotSelect(fullSnapshot);
       }
     } catch (error) {
       console.error('Error loading snapshot:', error);
-      setError('Failed to load snapshot for viewing');
+      setError('Failed to load snapshot details: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   const BRANCH_CODES = {
     'MEDAN': '1951',
     'JAKARTA 1': '1910',
@@ -701,24 +646,36 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
   // Add function to view snapshot in dashboard/analyze
   const handleViewSnapshot = async (snapshot) => {
     try {
-      const response = await axiosInstance.get(`/api/snapshots/${snapshot.id}`);
-      const fullSnapshot = response.data;
-      
-      // Pass both the snapshot stats and raw data
-      onSnapshotSelect({
-        ...fullSnapshot,
-        iraData: {
-          columns: fullSnapshot.iraData?.columns || [],
-          data: fullSnapshot.iraData?.data || [],
-        },
-        ccData: {
-          columns: fullSnapshot.ccData?.columns || [],
-          data: fullSnapshot.ccData?.data || [],
-        }
-      });
+      setLoading(true);
+      const fullSnapshot = await fetchSnapshotById(snapshot.id);
+      setSelectedSnapshot(fullSnapshot);
+      if (onSnapshotSelect) {
+        onSnapshotSelect(fullSnapshot);
+      }
     } catch (error) {
       console.error('Error loading snapshot:', error);
-      setError('Failed to load snapshot for viewing');
+      setError('Failed to load snapshot details: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSnapshot = async (id) => {
+    if (window.confirm('Are you sure you want to delete this snapshot?')) {
+      try {
+        setLoading(true);
+        await deleteSnapshot(id);
+        setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
+        if (selectedSnapshot?.id === id) {
+          setSelectedSnapshot(null);
+        }
+        handleSuccess('Snapshot deleted successfully');
+      } catch (error) {
+        console.error('Error deleting snapshot:', error);
+        setError('Failed to delete snapshot: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -889,7 +846,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                     <div 
                       key={snapshot.id} 
                       className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedSnapshot && selectedSnapshot.id === snapshot.id ? 'active' : ''}`}
-                      onClick={() => viewSnapshot(snapshot)}
+                      onClick={() => handleViewSnapshot(snapshot)}
                     >
                       <div>
                         <h6 className="mb-1">{snapshot.name}</h6>
@@ -926,7 +883,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                             className="btn btn-sm btn-outline-danger" 
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteSnapshot(snapshot.id);
+                              handleDeleteSnapshot(snapshot.id);
                             }}
                             title="Delete snapshot"
                           >
