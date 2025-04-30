@@ -31,7 +31,7 @@ export const fetchSnapshotById = async (id) => {
 
 export const checkDatabaseStatus = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/snapshots/db-status`);
+    const response = await axios.get(getApiUrl('snapshots/db-status'));
     return response.data;
   } catch (error) {
     console.error('Error checking database status:', error);

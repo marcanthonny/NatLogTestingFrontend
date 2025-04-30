@@ -7,8 +7,7 @@ import { getApiUrl } from '../config/api';
  */
 export const isServerAvailable = async () => {
   try {
-    // Use 'snapshots' instead of '/api/snapshots'
-    const response = await axios.head(getApiUrl('/api/snapshots'), { 
+    const response = await axios.head(getApiUrl('snapshots'), { 
       timeout: 5000,
       validateStatus: (status) => status === 200
     });
