@@ -253,7 +253,7 @@ function DataView({ iraData, ccData }) {
                   value={selectedDataType} 
                   onChange={handleDataTypeChange}
                 >
-                  <option value="ira">IRA Data</option>
+                  <option value="ira">Inventory Record Accuracy Data</option>
                   <option value="cc">Cycle Count Data</option>
                 </select>
               </div>

@@ -3,6 +3,7 @@ import axiosRetry from 'axios-retry';
 import { getApiUrl } from '../config/api';
 
 const axiosInstance = axios.create({
+  // Remove /api from base URL since getApiUrl handles it
   baseURL: getApiUrl(''),
   timeout: 10000,
   headers: {
