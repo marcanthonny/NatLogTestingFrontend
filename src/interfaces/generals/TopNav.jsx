@@ -128,13 +128,11 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
             className={`nav-link ${activeTab === 'excelEditor' ? 'active' : ''}`}
             onClick={(e) => handleNavClick('excelEditor', e)}
           >
-            <i className="bi bi-file-earmark-excel"></i>
             {translate('sidebar.excelEditor')}
           </a>
 
           <div className={`nav-group ${isGroupActive('ira') ? 'active' : ''}`}>
             <a href="#" className="nav-link" onClick={() => toggleGroup('ira')}>
-              <i className="bi bi-tools me-2"></i>
               IRA CC Tools
             </a>
             <div className="nav-group-menu">
@@ -143,21 +141,21 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
                 className={`nav-link ${activeTab === 'upload' ? 'active' : ''}`}
                 onClick={(e) => handleNavClick('upload', e)}
               >
-                <i className="bi bi-cloud-upload"></i> Upload
+                Upload
               </a>
               <a 
                 href="#"
                 className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`}
                 onClick={(e) => handleNavClick('dashboard', e)}
               >
-                <i className="bi bi-speedometer2"></i> IRA CC Dashboard
+                IRA CC Dashboard
               </a>
               <a 
                 href="#"
                 className={`nav-link ${activeTab === 'data' ? 'active' : ''} ${!hasIraData && !hasCcData ? 'disabled-link' : ''}`}
                 onClick={(e) => handleNavClick('data', e)}
               >
-                <i className="bi bi-table"></i> Data View
+                Data View
                 {!hasIraData && !hasCcData && <small className="ms-2 text-muted">(Needs data)</small>}
               </a>
               <a 
@@ -165,7 +163,7 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
                 className={`nav-link ${activeTab === 'historical' ? 'active' : ''}`}
                 onClick={(e) => handleNavClick('historical', e)}
               >
-                <i className="bi bi-archive"></i> Historical Dashboard
+                Historical Dashboard
               </a>
               <a 
                 href="#"
@@ -180,11 +178,31 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
 
           <div className={`nav-group ${isGroupActive('5s') ? 'active' : ''}`}>
             <a href="#" className="nav-link" onClick={() => toggleGroup('5s')}>
-              <i className="bi bi-clipboard-check me-2"></i>
               5S Scoring Tools
             </a>
             <div className="nav-group-menu">
               {/* ...existing 5S menu items... */}
+            </div>
+          </div>
+          <div className={`nav-group ${isGroupActive('BatchCorr') ? 'active' : ''}`}>
+            <a href="#" className="nav-link" onClick={() => toggleGroup('BatchCorr')}>
+              Batch Correction
+            </a>
+            <div className="nav-group-menu">
+            <a 
+                href="#"
+                className={`nav-link ${activeTab === 'formSummary' ? 'active' : ''}`}
+                onClick={(e) => handleNavClick('upload', e)}
+              >
+                 Form Summary
+              </a>
+              <a 
+                href="#"
+                className={`nav-link ${activeTab === 'formEditor' ? 'active' : ''}`}
+                onClick={(e) => handleNavClick('dashboard', e)}
+              >
+                Form Editor
+              </a>
             </div>
           </div>
 

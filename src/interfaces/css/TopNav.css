@@ -58,37 +58,39 @@
     background-color: #e9ecef;
   }
 
-  /* Dropdown menu base styles */
-.nav-group-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  min-width: 220px;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
-  z-index: 1000;
-}
-
-/* Desktop dropdown hover behavior */
-@media (min-width: 768px) {
   .nav-group {
     position: relative;
   }
 
+  .nav-group-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 220px;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+  }
+
+  /* Show menu on hover */
   .nav-group:hover .nav-group-menu {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
   }
 
-  /* Remove active class effect on desktop */
-  .nav-group.active .nav-group-menu {
-    opacity: 0;
-    visibility: hidden;
+  .nav-group-menu .nav-link {
+    padding: 8px 16px;
+    display: block;
+    width: 100%;
+    color: #333;
+    text-decoration: none;
+  }
+
+  .nav-group-menu .nav-link:hover {
+    background-color: #e9ecef;
   }
 }
 
@@ -125,16 +127,6 @@
   background: transparent;
 }
 
-.nav-group-menu .nav-link {
-  padding: 8px 16px;
-  display: block;
-  width: 100%;
-}
-
-.nav-group-menu .nav-link:hover {
-  background-color: #e9ecef;
-}
-
 .logout-button {
   padding: 0.5rem 1rem;
   color: #dc3545;
@@ -151,7 +143,6 @@
 .logout-button:hover {
   background-color: #fee2e2;
   color: #dc3545;
-}
 }
 
 /* Mobile styles */

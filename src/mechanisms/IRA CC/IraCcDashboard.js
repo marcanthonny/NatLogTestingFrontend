@@ -347,6 +347,7 @@ const processCcDataCore = (data) => {
   const normalizedData = normalizeColumns(data);
   addLog('Column normalization complete', 'info');
   
+  // Early returns for pre-processed data
   if (data?.ccStats || (data.percentage !== undefined && data.branchPercentages !== undefined)) {
     addLog('Using pre-processed CC data from snapshot', 'info');
     return data.ccStats || data;
@@ -357,39 +358,32 @@ const processCcDataCore = (data) => {
     return { counted: 0, notCounted: 0, percentage: 0, branchPercentages: [] };
   }
 
-  addLog(`Processing ${data.data.length} rows of CC data`, 'info');
-  
   const branchGroups = {};
   VALID_BRANCHES.forEach(branch => {
     branchGroups[branch] = { branch, counted: 0, total: 0 };
   });
 
-  const branchColumn = findBranchColumn(data.columns, addLog);
-  
-  if (!branchColumn) {
-    addLog('WARNING: Could not find branch column in CC data. Data processing may be incomplete.', 'warning');
-  } else {
-    addLog(`Using branch column for CC: ${branchColumn}`, 'info');
-  }
-
   let counted = 0;
   let notCounted = 0;
 
-  // Enhanced CC counting logic
+  // First pass: set %CountComp based on Count Status
+  data.data = data.data.map(row => {
+    const updatedRow = { ...row };
+    if (updatedRow['Count Status'] === 'Counted' && updatedRow['%CountComp'] !== 1) {
+      updatedRow['%CountComp'] = 1;
+    }
+    return updatedRow;
+  });
+
+  // Second pass: calculate statistics using %CountComp
   data.data.forEach(row => {
     if (!row) return;
     
-    const countStatus = row['Count Status'];
-    const countComp = row['%CountComp'];
-    const branch = branchColumn ? row[branchColumn] : null;
-
-    const isCounted = 
-      countStatus === 'Counted' || 
-      countComp === 1 || 
-      countComp === '1' || 
-      countComp === true;
-
-    if (isCounted) {
+    const branch = row.Branch || row['!Branch'] || row.Plant;
+    const countComp = Number(row['%CountComp']);
+    
+    // Use only %CountComp for counting
+    if (countComp === 1) {
       counted++;
       if (branch && VALID_BRANCHES.includes(branch)) {
         branchGroups[branch].counted++;

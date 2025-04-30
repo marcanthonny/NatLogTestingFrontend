@@ -410,8 +410,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
           onChange={(e) => setActiveTable(e.target.value)}
           className="form-select mb-3"
         >
-          <option value="ira">IRA Data</option>
-          <option value="cc">CC Data</option>
+          <option value="ira">Inventory Record Accuracy Data</option>
+          <option value="cc">Cycle Count Data</option>
         </select>
       </div>
 
@@ -443,7 +443,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                 <div className="row">
                   <div className="col-md-6">
                     <div className="alert alert-primary mb-0">
-                      <h6 className="mb-2">IRA Week</h6>
+                      <h6 className="mb-2">Inventory Record Accuracy Week</h6>
                       <strong>{currentWeek.ira.week}</strong>
                       <div className="mt-1">
                         <small>Target: {currentWeek.ira.target}%</small>
@@ -457,7 +457,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                   </div>
                   <div className="col-md-6">
                     <div className="alert alert-info mb-0">
-                      <h6 className="mb-2">CC Week</h6>
+                      <h6 className="mb-2">Cycle Count Week</h6>
                       <strong>{currentWeek.cc.week}</strong>
                       <div className="mt-1">
                         <small>Target: {currentWeek.cc.target}%</small>
@@ -483,7 +483,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
               <div className="card">
                 <div className="card-header bg-primary text-white">
                   <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0">IRA Summary</h5>
+                    <h5 className="mb-0">Inventory Record Accuracy Summary</h5>
                     {currentWeek?.ira && (
                       <div className="text-end">
                         <small className="d-block">{currentWeek.ira.week}</small>
@@ -517,7 +517,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                       <thead>
                         <tr>
                           <th className="text-start">Branch</th>
-                          <th className="text-end">IRA %</th>
+                          <th className="text-end">Percentage %</th>
                           <th className="text-center">Status</th>
                         </tr>
                       </thead>
@@ -553,7 +553,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
               <div className="card">
                 <div className="card-header bg-info text-white">
                   <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0">CC Summary</h5>
+                    <h5 className="mb-0">Cycle Count Summary</h5>
                     {currentWeek?.cc && (
                       <div className="text-end">
                         <small className="d-block">{currentWeek.cc.week}</small>
@@ -587,7 +587,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                       <thead>
                         <tr>
                           <th className="text-start">Branch</th>
-                          <th className="text-end">CC %</th>
+                          <th className="text-end">Percentage %</th>
                           <th className="text-center">Status</th>
                         </tr>
                       </thead>

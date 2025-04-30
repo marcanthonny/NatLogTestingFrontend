@@ -116,10 +116,19 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
         // Get headers and data properly structured
         const headers = XLSX.utils.sheet_to_json(worksheet, { header: 1 })[0];
         const rows = XLSX.utils.sheet_to_json(worksheet, { header: headers });
+
+        // Pre-process the data to set %CountComp based on Count Status
+        const processedRows = rows.map(row => {
+          const updatedRow = { ...row };
+          if (category === 'cc' && updatedRow['Count Status'] === 'Counted') {
+            updatedRow['%CountComp'] = 1;
+          }
+          return updatedRow;
+        });
         
         const processedData = {
           columns: headers,
-          data: rows,
+          data: processedRows,
           fileType: file.type,
           fileName: file.name,
           isPowerBi: usePowerBi[category]
