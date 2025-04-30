@@ -3,7 +3,7 @@ import axiosRetry from 'axios-retry';
 import API_BASE_URL from '../config/api';
 
 const axiosInstance = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: `${API_BASE_URL}/api`, // This will add /api prefix to all requests
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
