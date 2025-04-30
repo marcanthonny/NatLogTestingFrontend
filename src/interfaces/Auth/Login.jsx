@@ -1,19 +1,33 @@
 import React, { useState } from 'react';
 import '../../interfaces/css/components/Login.css';
 import aplLogo from '../../images/apl-logo.png';
+import axios from 'axios';
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'Admin@1234') {
-      localStorage.setItem('isAuthenticated', 'true');
-      onLogin(true);
-    } else {
-      setError('Invalid username or password');
+    try {
+      // Use direct axios call for login to avoid auth header
+      const response = await axios.post('https://aplnatlog-backend.vercel.app/api/auth/login', {
+        username,
+        password
+      });
+      
+      if (response.data && response.data.token) {
+        // Store token
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('isAuthenticated', 'true');
+        // Set auth header for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        onLogin(response.data.token);
+      }
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      setError(error.response?.data?.error || 'Login failed');
       setTimeout(() => setError(''), 3000);
     }
   };

@@ -1,10 +1,9 @@
-import axios from 'axios';
+import axiosInstance from './axiosConfig';
 import { getApiUrl } from '../config/api';
 
-// Update URLs to include /api prefix
 export const fetchAllSnapshots = async () => {
   try {
-    const response = await axios.get(getApiUrl('/snapshots'));
+    const response = await axiosInstance.get(getApiUrl('/snapshots'));
     if (!response.data) {
       throw new Error('No data received from server');
     }
@@ -17,7 +16,7 @@ export const fetchAllSnapshots = async () => {
 
 export const deleteSnapshot = async (id) => {
   try {
-    const response = await axios.delete(getApiUrl(`/snapshots/${id}`));
+    const response = await axiosInstance.delete(getApiUrl(`/snapshots/${id}`));
     return response.data;
   } catch (error) {
     console.error(`Error deleting snapshot ${id}:`, error);
@@ -27,7 +26,7 @@ export const deleteSnapshot = async (id) => {
 
 export const fetchSnapshotById = async (id) => {
   try {
-    const response = await axios.get(getApiUrl(`/snapshots/${id}`));
+    const response = await axiosInstance.get(getApiUrl(`/snapshots/${id}`));
     if (!response.data) {
       throw new Error('No data received from server');
     }
@@ -40,7 +39,7 @@ export const fetchSnapshotById = async (id) => {
 
 export const checkDatabaseStatus = async () => {
   try {
-    const response = await axios.get(getApiUrl('snapshots/db-status'));
+    const response = await axiosInstance.get(getApiUrl('snapshots/db-status'));
     return response.data;
   } catch (error) {
     console.error('Error checking database status:', error);

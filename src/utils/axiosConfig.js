@@ -23,13 +23,8 @@ axiosRetry(axiosInstance, {
   }
 });
 
-// Add request interceptor to add auth token
+// Update request interceptor
 axiosInstance.interceptors.request.use(config => {
-  // Skip auth in development
-  if (process.env.NODE_ENV === 'development') {
-    return config;
-  }
-  
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -39,24 +34,15 @@ axiosInstance.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-// Handle token expiry and network errors
+// Update response interceptor to handle 401s
 axiosInstance.interceptors.response.use(
   response => response,
   error => {
-    if (!error.response) {
-      // Network error handling
-      console.error('Network error detected:', error.message);
-      const customError = new Error('Network error - Please check your connection');
-      customError.isNetworkError = true;
-      return Promise.reject(customError);
-    }
-    
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('isAuthenticated');
-      window.location.href = '/login';
+      window.location.href = '/';
     }
-    
     return Promise.reject(error);
   }
 );
