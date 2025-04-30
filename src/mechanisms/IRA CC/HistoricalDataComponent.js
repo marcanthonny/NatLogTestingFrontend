@@ -79,7 +79,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     
     try {
       // Use full URL from config including /api prefix
-      const response = await axiosInstance.get('/api/snapshots', {
+      const response = await axiosInstance.get('/snapshots', {
         timeout: 5000,
         headers: {
           'Accept': 'application/json',
@@ -263,7 +263,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       try {
         console.log('Saving snapshot to server:', snapshot.name);
         
-        const response = await axiosInstance.post('/api/snapshots', snapshot, {
+        const response = await axiosInstance.post('/snapshots', snapshot, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -459,7 +459,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       setError(null);
       
       try {
-        await axiosInstance.delete(`/api/snapshots/${id}`);
+        await axiosInstance.delete(`/snapshots/${id}`);
         
         // If successful, update local state immediately
         setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
@@ -518,7 +518,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       }
   
       // Otherwise fetch from server
-      const response = await axiosInstance.get(`/api/snapshots/${snapshotInfo.id}`);
+      const response = await axiosInstance.get(`/snapshots/${snapshotInfo.id}`);
       const fullSnapshot = response.data;
   
       setSelectedSnapshot(fullSnapshot);
