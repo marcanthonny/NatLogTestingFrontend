@@ -1,34 +1,39 @@
 import React, { useState } from 'react';
 import '../../interfaces/css/components/Login.css';
 import aplLogo from '../../images/apl-logo.png';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
+import { getApiUrl } from '../../config/api';
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      // Use direct axios call for login to avoid auth header
-      const response = await axios.post('https://aplnatlog-backend.vercel.app/api/auth/login', {
-        username,
+      const response = await axiosInstance.post(getApiUrl('/auth/login'), {
+        username: username.trim().toLowerCase(), // Normalize username
         password
       });
       
-      if (response.data && response.data.token) {
-        // Store token
-        localStorage.setItem('authToken', response.data.token);
-        localStorage.setItem('isAuthenticated', 'true');
-        // Set auth header for future requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      if (response.data?.token) {
         onLogin(response.data.token);
+      } else {
+        setError('Invalid response from server');
       }
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      setError(error.response?.data?.error || 'Login failed');
-      setTimeout(() => setError(''), 3000);
+      if (error.response?.status === 401) {
+        setError('Invalid username or password');
+      } else {
+        setError(error.response?.data?.error || 'Login failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,8 +45,6 @@ function Login({ onLogin }) {
             src={aplLogo} 
             alt="APL Logo" 
             className="login-logo"
-            width="auto"
-            height="auto"
           />
         </div>
         <h3>Login to Continue</h3>
@@ -54,6 +57,8 @@ function Login({ onLogin }) {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
+              required
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -64,11 +69,17 @@ function Login({ onLogin }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
+              required
+              disabled={loading}
             />
           </div>
           {error && <div className="alert alert-danger">{error}</div>}
-          <button type="submit" className="btn btn-primary w-100">
-            Login
+          <button 
+            type="submit" 
+            className="btn btn-primary w-100"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
