@@ -38,6 +38,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null); // Add success state
   // Add state for custom date
   const [snapshotDate, setSnapshotDate] = useState(formatDateForInput(new Date()));
   // Add new state for storage location
@@ -463,10 +464,29 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
   const handleViewSnapshot = async (snapshot) => {
     try {
       setLoading(true);
+      setError(null);
       const fullSnapshot = await fetchSnapshotById(snapshot.id);
-      setSelectedSnapshot(fullSnapshot);
+      
+      // Ensure stats have proper structure even if data is missing
+      const normalizedSnapshot = {
+        ...fullSnapshot,
+        iraStats: {
+          counted: fullSnapshot?.iraStats?.counted || 0,
+          notCounted: fullSnapshot?.iraStats?.notCounted || 0,
+          percentage: fullSnapshot?.iraStats?.percentage || 0,
+          branchPercentages: fullSnapshot?.iraStats?.branchPercentages || []
+        },
+        ccStats: {
+          counted: fullSnapshot?.ccStats?.counted || 0,
+          notCounted: fullSnapshot?.ccStats?.notCounted || 0,
+          percentage: fullSnapshot?.ccStats?.percentage || 0,
+          branchPercentages: fullSnapshot?.ccStats?.branchPercentages || []
+        }
+      };
+
+      setSelectedSnapshot(normalizedSnapshot);
       if (onSnapshotSelect) {
-        onSnapshotSelect(fullSnapshot);
+        onSnapshotSelect(normalizedSnapshot);
       }
     } catch (error) {
       console.error('Error loading snapshot:', error);
@@ -643,40 +663,45 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     }
   };
 
-  // Add function to view snapshot in dashboard/analyze
-  const handleViewSnapshot = async (snapshot) => {
+  // Fix delete handler to properly remove snapshot and update UI
+  const handleDeleteSnapshot = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this snapshot?')) {
+      return;
+    }
+
     try {
       setLoading(true);
-      const fullSnapshot = await fetchSnapshotById(snapshot.id);
-      setSelectedSnapshot(fullSnapshot);
-      if (onSnapshotSelect) {
-        onSnapshotSelect(fullSnapshot);
+      setError(null);
+      await deleteSnapshot(id);
+      
+      // Update local state to remove the deleted snapshot
+      setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
+      
+      // Clear selected snapshot if it was the one deleted
+      if (selectedSnapshot?.id === id) {
+        setSelectedSnapshot(null);
+        if (onSnapshotSelect) {
+          onSnapshotSelect(null);
+        }
       }
+      
+      setSuccess('Snapshot deleted successfully');
+      
+      // Refresh the list
+      await loadHistoricalData();
     } catch (error) {
-      console.error('Error loading snapshot:', error);
-      setError('Failed to load snapshot details: ' + error.message);
+      console.error('Error deleting snapshot:', error);
+      setError('Failed to delete snapshot: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteSnapshot = async (id) => {
-    if (window.confirm('Are you sure you want to delete this snapshot?')) {
-      try {
-        setLoading(true);
-        await deleteSnapshot(id);
-        setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
-        if (selectedSnapshot?.id === id) {
-          setSelectedSnapshot(null);
-        }
-        handleSuccess('Snapshot deleted successfully');
-      } catch (error) {
-        console.error('Error deleting snapshot:', error);
-        setError('Failed to delete snapshot: ' + error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const handleSuccess = (message) => {
+    setSuccess(message);
+    setError(null);
+    // Auto-clear success message after 5 seconds
+    setTimeout(() => setSuccess(null), 5000);
   };
 
   return (
@@ -685,6 +710,13 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
         <div className="alert alert-danger mb-4">
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
           {error}
+        </div>
+      )}
+      
+      {success && ( // Add success message display
+        <div className="alert alert-success mb-4">
+          <i className="bi bi-check-circle me-2"></i>
+          {success}
         </div>
       )}
       
@@ -925,30 +957,30 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                         <div className="d-flex justify-content-between mb-3">
                           <div>
                             <h6>Counted</h6>
-                            <h4>{selectedSnapshot.iraStats.counted}</h4>
+                            <h4>{selectedSnapshot?.iraStats?.counted || 0}</h4>
                           </div>
                           <div>
                             <h6>Not Counted</h6>
-                            <h4>{selectedSnapshot.iraStats.notCounted}</h4>
+                            <h4>{selectedSnapshot?.iraStats?.notCounted || 0}</h4>
                           </div>
                           <div>
                             <h6>Percentage</h6>
-                            <h4>{selectedSnapshot.iraStats.percentage.toFixed(2)}%</h4>
+                            <h4>{selectedSnapshot?.iraStats?.percentage?.toFixed(2) || '0.00'}%</h4>
                           </div>
                         </div>
                         <h6>Top Branches</h6>
                         <ul className="list-group">
-                          {selectedSnapshot.iraStats.branchPercentages
-                            .sort((a, b) => b.percentage - a.percentage)
-                            .slice(0, 5)
-                            .map((branch, index) => (
+                          {selectedSnapshot?.iraStats?.branchPercentages
+                            ?.sort((a, b) => b.percentage - a.percentage)
+                            ?.slice(0, 5)
+                            ?.map((branch, index) => (
                               <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                                 <span>{getBranchShortName(branch.branch)}</span>
                                 <span className="badge bg-primary rounded-pill">
                                   {branch.percentage.toFixed(1)}%
                                 </span>
                               </li>
-                            ))}
+                            )) || <li className="list-group-item">No data available</li>}
                         </ul>
                       </div>
                     </div>
@@ -961,30 +993,30 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                         <div className="d-flex justify-content-between mb-3">
                           <div>
                             <h6>Counted</h6>
-                            <h4>{selectedSnapshot.ccStats.counted}</h4>
+                            <h4>{selectedSnapshot?.ccStats?.counted || 0}</h4>
                           </div>
                           <div>
                             <h6>Not Counted</h6>
-                            <h4>{selectedSnapshot.ccStats.notCounted}</h4>
+                            <h4>{selectedSnapshot?.ccStats?.notCounted || 0}</h4>
                           </div>
                           <div>
                             <h6>Percentage</h6>
-                            <h4>{selectedSnapshot.ccStats.percentage.toFixed(2)}%</h4>
+                            <h4>{selectedSnapshot?.ccStats?.percentage?.toFixed(2) || '0.00'}%</h4>
                           </div>
                         </div>
                         <h6>Top Branches</h6>
                         <ul className="list-group">
-                          {selectedSnapshot.ccStats.branchPercentages
-                            .sort((a, b) => b.percentage - a.percentage)
-                            .slice(0, 5)
-                            .map((branch, index) => (
+                          {selectedSnapshot?.ccStats?.branchPercentages
+                            ?.sort((a, b) => b.percentage - a.percentage)
+                            ?.slice(0, 5)
+                            ?.map((branch, index) => (
                               <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                                 <span>{getBranchShortName(branch.branch)}</span>
                                 <span className="badge bg-info rounded-pill">
                                   {branch.percentage.toFixed(1)}%
                                 </span>
                               </li>
-                            ))}
+                            )) || <li className="list-group-item">No data available</li>}
                         </ul>
                       </div>
                     </div>
@@ -1006,15 +1038,14 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                               </tr>
                             </thead>
                             <tbody>
-                              {/* Create a map of branches for easier lookup */}
                               {(() => {
                                 const iraBranchMap = {};
-                                selectedSnapshot.iraStats.branchPercentages.forEach(branch => {
+                                selectedSnapshot?.iraStats?.branchPercentages?.forEach(branch => {
                                   iraBranchMap[branch.branch] = branch.percentage;
                                 });
                                 
                                 const ccBranchMap = {};
-                                selectedSnapshot.ccStats.branchPercentages.forEach(branch => {
+                                selectedSnapshot?.ccStats?.branchPercentages?.forEach(branch => {
                                   ccBranchMap[branch.branch] = branch.percentage;
                                 });
                                 

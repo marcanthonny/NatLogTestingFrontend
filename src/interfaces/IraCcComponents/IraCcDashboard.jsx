@@ -505,8 +505,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                     </div>
                     <div className="col-4 text-center">
                       <h6>Percentage</h6>
-                      <h3 className={iraStats.percentage >= 99 ? "text-success" : "text-danger"}>
-                        {iraStats.percentage.toFixed(2)}%
+                      <h3 className={iraStats?.percentage >= 99 ? "text-success" : "text-danger"}>
+                        {(iraStats?.percentage || 0).toFixed(2)}%
                       </h3>
                     </div>
                   </div>
@@ -522,18 +522,18 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {iraStats.branchPercentages
-                          .sort((a, b) => b.percentage - a.percentage)
+                        {(iraStats?.branchPercentages || [])
+                          .sort((a, b) => (b?.percentage || 0) - (a?.percentage || 0))
                           .map((branch, index) => (
                             <tr key={index}>
                               <td className="text-start">{branch.branch}</td>
                               <td className="text-end">
-                                <span className={meetsIraTarget(branch.percentage) ? "text-success" : "text-danger"}>
-                                  {branch.percentage.toFixed(2)}%
+                                <span className={meetsIraTarget(branch?.percentage) ? "text-success" : "text-danger"}>
+                                  {(branch?.percentage || 0).toFixed(2)}%
                                 </span>
                               </td>
                               <td className="text-center">
-                                {meetsIraTarget(branch.percentage) ? (
+                                {meetsIraTarget(branch?.percentage) ? (
                                   <span className="badge bg-success">On Target</span>
                                 ) : (
                                   <span className="badge bg-danger">Below Target</span>
@@ -575,8 +575,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                     </div>
                     <div className="col-4 text-center">
                       <h6>Percentage</h6>
-                      <h3 className={ccStats.percentage >= currentWeek?.cc?.target ? "text-success" : "text-warning"}>
-                        {ccStats.percentage.toFixed(2)}%
+                      <h3 className={ccStats.percentage >= (currentWeek?.cc?.target || 0) ? "text-success" : "text-warning"}>
+                        {(ccStats?.percentage || 0).toFixed(2)}%
                       </h3>
                     </div>
                   </div>
@@ -592,18 +592,18 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {ccStats.branchPercentages
-                          .sort((a, b) => b.percentage - a.percentage)
+                        {(ccStats?.branchPercentages || [])
+                          .sort((a, b) => (b?.percentage || 0) - (a?.percentage || 0))
                           .map((branch, index) => (
                             <tr key={index}>
                               <td className="text-start">{branch.branch}</td>
                               <td className="text-end">
-                                <span className={meetsCcTarget(branch.percentage) ? "text-success" : "text-danger"}>
-                                  {branch.percentage.toFixed(2)}%
+                                <span className={meetsCcTarget(branch?.percentage) ? "text-success" : "text-danger"}>
+                                  {(branch?.percentage || 0).toFixed(2)}%
                                 </span>
                               </td>
                               <td className="text-center">
-                                {meetsCcTarget(branch.percentage) ? (
+                                {meetsCcTarget(branch?.percentage) ? (
                                   <span className="badge bg-success">On Target</span>
                                 ) : (
                                   <span className="badge bg-danger">Below Target</span>
@@ -689,8 +689,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                   </div>
                   <div className="col-4 text-center">
                     <h6>Percentage</h6>
-                    <h3 className={iraStats.percentage >= 99 ? "text-success" : "text-danger"}>
-                      {iraStats.percentage.toFixed(2)}%
+                    <h3 className={iraStats?.percentage >= 99 ? "text-success" : "text-danger"}>
+                      {(iraStats?.percentage || 0).toFixed(2)}%
                     </h3>
                   </div>
                 </div>
@@ -706,18 +706,18 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {iraStats.branchPercentages
-                        .sort((a, b) => b.percentage - a.percentage)
+                      {(iraStats?.branchPercentages || [])
+                        .sort((a, b) => (b?.percentage || 0) - (a?.percentage || 0))
                         .map((branch, index) => (
                           <tr key={index}>
                             <td className="text-start">{branch.branch}</td>
                             <td className="text-end">
-                              <span className={meetsIraTarget(branch.percentage) ? "text-success" : "text-danger"}>
-                                {branch.percentage.toFixed(2)}%
+                              <span className={meetsIraTarget(branch?.percentage) ? "text-success" : "text-danger"}>
+                                {(branch?.percentage || 0).toFixed(2)}%
                               </span>
                             </td>
                             <td className="text-center">
-                              {meetsIraTarget(branch.percentage) ? (
+                              {meetsIraTarget(branch?.percentage) ? (
                                 <span className="badge bg-success">On Target</span>
                               ) : (
                                 <span className="badge bg-danger">Below Target</span>
@@ -759,8 +759,8 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                   </div>
                   <div className="col-4 text-center">
                     <h6>Percentage</h6>
-                    <h3 className={ccStats.percentage >= currentWeek?.cc?.target ? "text-success" : "text-warning"}>
-                      {ccStats.percentage.toFixed(2)}%
+                    <h3 className={ccStats.percentage >= (currentWeek?.cc?.target || 0) ? "text-success" : "text-warning"}>
+                      {(ccStats?.percentage || 0).toFixed(2)}%
                     </h3>
                   </div>
                 </div>
@@ -776,18 +776,18 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {ccStats.branchPercentages
-                        .sort((a, b) => b.percentage - a.percentage)
+                      {(ccStats?.branchPercentages || [])
+                        .sort((a, b) => (b?.percentage || 0) - (a?.percentage || 0))
                         .map((branch, index) => (
                           <tr key={index}>
                             <td className="text-start">{branch.branch}</td>
                             <td className="text-end">
-                              <span className={meetsCcTarget(branch.percentage) ? "text-success" : "text-danger"}>
-                                {branch.percentage.toFixed(2)}%
+                              <span className={meetsCcTarget(branch?.percentage) ? "text-success" : "text-danger"}>
+                                {(branch?.percentage || 0).toFixed(2)}%
                               </span>
                             </td>
                             <td className="text-center">
-                              {meetsCcTarget(branch.percentage) ? (
+                              {meetsCcTarget(branch?.percentage) ? (
                                 <span className="badge bg-success">On Target</span>
                               ) : (
                                 <span className="badge bg-danger">Below Target</span>

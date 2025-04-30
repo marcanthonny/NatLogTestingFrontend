@@ -1,11 +1,10 @@
 import axios from 'axios';
 import { getApiUrl } from '../config/api';
 
-// Remove API_URL constant as we'll use getApiUrl helper
-
+// Update URLs to include /api prefix
 export const fetchAllSnapshots = async () => {
   try {
-    const response = await axios.get(getApiUrl('snapshots'));
+    const response = await axios.get(getApiUrl('/snapshots'));
     if (!response.data) {
       throw new Error('No data received from server');
     }
@@ -18,7 +17,7 @@ export const fetchAllSnapshots = async () => {
 
 export const deleteSnapshot = async (id) => {
   try {
-    const response = await axios.delete(getApiUrl(`snapshots/${id}`));
+    const response = await axios.delete(getApiUrl(`/snapshots/${id}`));
     return response.data;
   } catch (error) {
     console.error(`Error deleting snapshot ${id}:`, error);
@@ -28,7 +27,7 @@ export const deleteSnapshot = async (id) => {
 
 export const fetchSnapshotById = async (id) => {
   try {
-    const response = await axios.get(getApiUrl(`snapshots/${id}`));
+    const response = await axios.get(getApiUrl(`/snapshots/${id}`));
     if (!response.data) {
       throw new Error('No data received from server');
     }

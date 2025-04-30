@@ -13,7 +13,6 @@ import TopNav from './interfaces/generals/TopNav.jsx';
 import UndoRedo from './interfaces/generals/UndoRedo';
 import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
 import DataView from './mechanisms/IRA CC/DataView';
-import AnalyzeComponent from './mechanisms/IRA CC/AnalyzeComponent';
 import HistoricalDataComponent from './mechanisms/IRA CC/HistoricalDataComponent';
 import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
 import ExcelEditor from './interfaces/ExcelEditor/ExcelEditor';
@@ -411,14 +410,7 @@ function App() {
           ccData={ccData || selectedSnapshot?.ccData}
           isHistoricalView={!iraData && !ccData}
           snapshotInfo={selectedSnapshot}
-          onError={handleError} // Add this line
-        />;
-      case 'analyze':
-        return <AnalyzeComponent 
-          iraData={iraData || selectedSnapshot?.iraData} 
-          ccData={ccData || selectedSnapshot?.ccData}
-          isHistoricalView={!iraData && !ccData}
-          snapshotInfo={selectedSnapshot}
+          onError={handleError}
         />;
       case 'historical':
         return <HistoricalDataComponent 
