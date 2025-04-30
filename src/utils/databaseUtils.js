@@ -1,15 +1,11 @@
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 
-// API base URL from environment
-const API_URL = process.env.REACT_APP_API_URL || 'https://aplnatlog-backend.vercel.app';
+// Remove API_URL constant as we'll use getApiUrl helper
 
-/**
- * Fetch all snapshots from database
- * @returns {Promise<Array>} Array of snapshots
- */
 export const fetchAllSnapshots = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/snapshots`);
+    const response = await axios.get(getApiUrl('snapshots'));
     if (!response.data) {
       throw new Error('No data received from server');
     }
@@ -20,14 +16,9 @@ export const fetchAllSnapshots = async () => {
   }
 };
 
-/**
- * Fetch single snapshot by ID
- * @param {string} id Snapshot ID
- * @returns {Promise<Object>} Snapshot data
- */
 export const fetchSnapshotById = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}/api/snapshots/${id}`);
+    const response = await axios.get(getApiUrl(`snapshots/${id}`));
     if (!response.data) {
       throw new Error('No data received from server');
     }
@@ -38,10 +29,6 @@ export const fetchSnapshotById = async (id) => {
   }
 };
 
-/**
- * Check database connection status
- * @returns {Promise<Object>} Connection status
- */
 export const checkDatabaseStatus = async () => {
   try {
     const response = await axios.get(`${API_URL}/api/snapshots/db-status`);
