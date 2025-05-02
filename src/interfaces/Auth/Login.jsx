@@ -16,25 +16,17 @@ const Login = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      console.log('Attempting login with:', {
-        url: getApiUrl('auth/login'),
-        username: username.trim().toLowerCase()
-      });
-
       const response = await axiosInstance.post('auth/login', {
         username: username.trim().toLowerCase(),
         password
       });
       
-      console.log('Login response:', response.data);
-      
       if (response.data?.token) {
-        onLogin(response.data.token);
+        onLogin(response.data.token, response.data.user.role);
       } else {
         setError('Invalid response from server');
       }
     } catch (error) {
-      console.error('Login error:', error.response || error);
       setError(error.response?.data?.error || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
