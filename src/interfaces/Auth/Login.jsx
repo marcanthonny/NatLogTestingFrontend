@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import '../../interfaces/css/components/Login.css';
-import aplLogo from '../../images/apl-logo.png';
 import axiosInstance from '../../utils/axiosConfig';
 import { getApiUrl } from '../../config/api';
+import '../../interfaces/css/components/Login.css';
+import aplLogo from '../../images/apl-logo.png';
 
-function Login({ onLogin }) {
+const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,10 +16,17 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post(getApiUrl('/auth/login'), {
-        username: username.trim().toLowerCase(), // Normalize username
+      console.log('Attempting login with:', {
+        url: getApiUrl('auth/login'),
+        username: username.trim().toLowerCase()
+      });
+
+      const response = await axiosInstance.post('auth/login', {
+        username: username.trim().toLowerCase(),
         password
       });
+      
+      console.log('Login response:', response.data);
       
       if (response.data?.token) {
         onLogin(response.data.token);
@@ -27,14 +34,15 @@ function Login({ onLogin }) {
         setError('Invalid response from server');
       }
     } catch (error) {
-      if (error.response?.status === 401) {
-        setError('Invalid username or password');
-      } else {
-        setError(error.response?.data?.error || 'Login failed. Please try again.');
-      }
+      console.error('Login error:', error.response || error);
+      setError(error.response?.data?.error || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageError = (e) => {
+    e.target.style.display = 'none';
   };
 
   return (
@@ -45,6 +53,7 @@ function Login({ onLogin }) {
             src={aplLogo} 
             alt="APL Logo" 
             className="login-logo"
+            onError={handleImageError}
           />
         </div>
         <h3>Login to Continue</h3>

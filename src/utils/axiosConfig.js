@@ -1,21 +1,24 @@
 import axios from 'axios';
-import { getApiUrl } from '../config/api';
+import apiBaseUrl from '../config/api';
 
 const axiosInstance = axios.create({
-  baseURL: getApiUrl(''),
-  timeout: 15000,
+  baseURL: apiBaseUrl,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true
 });
 
-// Add auth token to requests if available
+// Add auth token to requests
 axiosInstance.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, error => {
+  return Promise.reject(error);
 });
 
 // Handle auth errors

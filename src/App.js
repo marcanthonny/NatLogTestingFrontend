@@ -1,24 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
+// Third-party imports
+import axiosInstance from './utils/axiosConfig'; 
+
+// Translation context should be imported before components that use it
 import { useLanguage } from './mechanisms/General/LanguageContext';
+
+// Import styles before components
 import './interfaces/css/App.css';
 import './interfaces/css/Dashboard.css';
-// Fix imports to use correct paths and exports
+
+// Import utilities and helpers
+import { getAuthToken, setAuthToken } from './utils/authUtils';
+
+// Then import components
+import Login from './interfaces/Auth/Login';
+import TopNav from './interfaces/generals/TopNav';
 import EnhancedFileUpload from './interfaces/IraCcComponents/EnhancedFileUpload';
-import ExcelTable from './mechanisms/Excel Editor/ExcelTable';
-import FormulaBuilder from './mechanisms/Excel Editor/FormulaBuilder';
-import ColumnFormatter from './mechanisms/Excel Editor/ColumnFormatter';
-import FilterPanel from './mechanisms/Excel Editor/FilterPanel';
-import ToolBar from './mechanisms/Excel Editor/ToolBar';
-import TopNav from './interfaces/generals/TopNav.jsx';
-import UndoRedo from './interfaces/generals/UndoRedo';
-import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
+import ExcelEditor from './interfaces/ExcelEditor/ExcelEditor';
 import DataView from './mechanisms/IRA CC/DataView';
+import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
 import HistoricalDataComponent from './mechanisms/IRA CC/HistoricalDataComponent';
 import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
-import ExcelEditor from './interfaces/ExcelEditor/ExcelEditor';
-import Login from './interfaces/Auth/Login.jsx';
-import { getAuthToken, setAuthToken } from './utils/authUtils';
-import axiosInstance from './utils/axiosConfig';
 
 function App() {
   const { translate } = useLanguage();
