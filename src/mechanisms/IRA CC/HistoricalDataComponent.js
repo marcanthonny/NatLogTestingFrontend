@@ -81,7 +81,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     
     try {
       // Use full URL from config including /api prefix
-      const response = await axiosInstance.get('/api/snapshots', {
+      const response = await axiosInstance.get('/snapshots', {
         timeout: 5000,
         headers: {
           'Accept': 'application/json',
