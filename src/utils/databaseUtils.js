@@ -26,7 +26,7 @@ export const deleteSnapshot = async (id) => {
 
 export const fetchSnapshotById = async (id) => {
   try {
-    const response = await axiosInstance.get(`/api/snapshots/${id}`);
+    const response = await axiosInstance.get(`/snapshots/${id}`);
     if (!response.data) {
       throw new Error('No data received from server');
     }
