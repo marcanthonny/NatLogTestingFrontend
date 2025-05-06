@@ -22,6 +22,9 @@ const Login = ({ onLogin }) => {
       });
       
       if (response.data?.token) {
+        // Store token in localStorage before calling onLogin
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('isAuthenticated', 'true');
         onLogin(response.data.token, response.data.user.role);
       } else {
         setError('Invalid credentials');
