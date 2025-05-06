@@ -11,12 +11,12 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent form submission reload
     setError('');
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post('auth/login', {
+      const response = await axiosInstance.post('/api/auth/login', {
         username: username.trim().toLowerCase(),
         password
       });
@@ -24,11 +24,11 @@ const Login = ({ onLogin }) => {
       if (response.data?.token) {
         onLogin(response.data.token, response.data.user.role);
       } else {
-        setError('Invalid response from server');
+        setError('Invalid credentials');
+        setLoading(false);
       }
     } catch (error) {
-      setError(error.response?.data?.error || 'Login failed. Please try again.');
-    } finally {
+      setError(error.response?.data?.error || 'Invalid credentials');
       setLoading(false);
     }
   };

@@ -22,8 +22,21 @@ import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
 import HistoricalDataComponent from './mechanisms/IRA CC/HistoricalDataComponent';
 import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
 
+import { handleLogin, handleLogout } from './mechanisms/Handlers/AuthHandlers';
+import { createDataHandlers } from './mechanisms/Handlers/DataHandlers';
+import { createExcelHandlers } from './mechanisms/Handlers/ExcelHandlers';
+import { createUIHandlers } from './mechanisms/Handlers/UIHandlers';
+import { createHistoryHandlers } from './mechanisms/Handlers/HistoryHandlers';
+import { createAuthHandlers } from './mechanisms/Handlers/AuthHandlers';
+
 function App() {
   const { translate } = useLanguage();
+
+  // Move auth states to top
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
+  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
 
   // IRA CC states
   const [iraData, setIraData] = useState(null);
@@ -76,6 +89,30 @@ function App() {
     }
     return null;
   });
+
+  // Initialize handlers after all states are declared
+  const uiHandlers = createUIHandlers(setLoading, setError, setSuccess);
+  
+  const { loginHandler, logoutHandler } = createAuthHandlers(
+    setAuthToken, 
+    setIsAuthenticated, 
+    setActiveTab
+  );
+  
+  const dataHandlers = createDataHandlers(
+    setIraData, setCcData, setLoading, setError, setSuccess,
+    setIraPowerBiUsed, setCcPowerBiUsed
+  );
+  
+  const excelHandlers = createExcelHandlers(setExcelData, setExcelEditorData);
+  
+  const historyHandlers = createHistoryHandlers(
+    iraData, ccData, iraHistory, ccHistory,
+    setIraData, setCcData, setIraHistory, setCcHistory,
+    iraHistoryIndex, ccHistoryIndex,
+    setIraHistoryIndex, setCcHistoryIndex,
+    ignoreNextHistoryUpdate
+  );
 
   // Add data to history when it changes
   useEffect(() => {
@@ -134,250 +171,9 @@ function App() {
     }
   }, []);
 
-  const handleIraData = (data) => {
-    // Ensure data is properly structured
-    const processedData = {
-      columns: data.columns || Object.keys(data.data?.[0] || {}),
-      data: data.data || [],
-      isPowerBi: data.isPowerBi,
-      fileName: data.fileName
-    };
-
-    setIraData(processedData);
-    
-    if (processedData.isPowerBi) {
-      setIraPowerBiUsed(true);
-    }
-    
-    setLoading(false);
-    setError(null);
-    setSuccess('IRA data processed successfully');
-  };
-
-  const handleCcData = (data) => {
-    // Ensure data is properly structured
-    const processedData = {
-      columns: data.columns || Object.keys(data.data?.[0] || {}),
-      data: data.data || [],
-      isPowerBi: data.isPowerBi,
-      fileName: data.fileName
-    };
-
-    setCcData(processedData);
-    
-    if (processedData.isPowerBi) {
-      setCcPowerBiUsed(true);
-    }
-    
-    setLoading(false);
-    setError(null);
-    setSuccess('CC data processed successfully');
-  };
-
-  const handleLoading = (isLoading) => {
-    setLoading(isLoading);
-  };
-
-  const handleError = (errorMsg) => {
-    setError(errorMsg);
-    setSuccess(null); // Clear any success messages
-    setLoading(false);
-    
-    // Auto-clear error after 5 seconds
-    setTimeout(() => setError(null), 5000);
-  };
-  
-  const handleSuccess = (successMsg) => {
-    setSuccess(successMsg);
-    setError(null); // Clear any error messages
-    
-    // Auto-clear success message after 5 seconds
-    setTimeout(() => setSuccess(null), 5000);
-  };
-
-  const handleFormulaApplied = (result) => {
-    if (iraData) {
-      setIraData({
-        ...iraData,
-        columns: result.columns,
-        data: result.data
-      });
-    }
-    if (ccData) {
-      setCcData({
-        ...ccData,
-        columns: result.columns,
-        data: result.data
-      });
-    }
-  };
-
-  const handleFormatApplied = (result) => {
-    if (iraData) {
-      setIraData({
-        ...iraData,
-        columns: result.columns,
-        data: result.data
-      });
-    }
-    if (ccData) {
-      setCcData({
-        ...ccData,
-        columns: result.columns,
-        data: result.data
-      });
-    }
-  };
-  
-  const handleFilterApplied = (result) => {
-    if (iraData) {
-      setIraData({
-        ...iraData,
-        columns: result.columns,
-        data: result.data
-      });
-    }
-    if (ccData) {
-      setCcData({
-        ...ccData,
-        columns: result.columns,
-        data: result.data
-      });
-    }
-  };
-  
-  const handleUndo = () => {
-    if (iraHistoryIndex > 0) {
-      ignoreNextHistoryUpdate.current = true;
-      const previousState = iraHistory[iraHistoryIndex - 1];
-      setIraData({
-        ...iraData,
-        columns: previousState.columns,
-        data: previousState.data
-      });
-      setIraHistoryIndex(iraHistoryIndex - 1);
-    }
-    if (ccHistoryIndex > 0) {
-      ignoreNextHistoryUpdate.current = true;
-      const previousState = ccHistory[ccHistoryIndex - 1];
-      setCcData({
-        ...ccData,
-        columns: previousState.columns,
-        data: previousState.data
-      });
-      setCcHistoryIndex(ccHistoryIndex - 1);
-    }
-  };
-  
-  const handleRedo = () => {
-    if (iraHistoryIndex < iraHistory.length - 1) {
-      ignoreNextHistoryUpdate.current = true;
-      const nextState = iraHistory[iraHistoryIndex + 1];
-      setIraData({
-        ...iraData,
-        columns: nextState.columns,
-        data: nextState.data
-      });
-      setIraHistoryIndex(iraHistoryIndex + 1);
-    }
-    if (ccHistoryIndex < ccHistory.length - 1) {
-      ignoreNextHistoryUpdate.current = true;
-      const nextState = ccHistory[ccHistoryIndex + 1];
-      setCcData({
-        ...ccData,
-        columns: nextState.columns,
-        data: nextState.data
-      });
-      setCcHistoryIndex(ccHistoryIndex + 1);
-    }
-  };
-  
-  const handleDeleteColumn = (columnToDelete) => {
-    if (iraData) {
-      const newColumns = iraData.columns.filter(column => column !== columnToDelete);
-      const newData = iraData.data.map(row => {
-        const newRow = { ...row };
-        delete newRow[columnToDelete];
-        return newRow;
-      });
-      
-      setIraData({
-        ...iraData,
-        columns: newColumns,
-        data: newData
-      });
-    }
-    if (ccData) {
-      const newColumns = ccData.columns.filter(column => column !== columnToDelete);
-      const newData = ccData.data.map(row => {
-        const newRow = { ...row };
-        delete newRow[columnToDelete];
-        return newRow;
-      });
-      
-      setCcData({
-        ...ccData,
-        columns: newColumns,
-        data: newData
-      });
-    }
-  };
-  
-  const handleDeleteRow = (rowIndex) => {
-    if (iraData) {
-      const newData = [...iraData.data];
-      newData.splice(rowIndex, 1);
-      
-      setIraData({
-        ...iraData,
-        data: newData
-      });
-    }
-    if (ccData) {
-      const newData = [...ccData.data];
-      newData.splice(rowIndex, 1);
-      
-      setCcData({
-        ...ccData,
-        data: newData
-      });
-    }
-  };
-
   // Add language toggle function
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'id' : 'en');
-  };
-
-  // When uploading or editing the file, update excelData here
-  const handleExcelDataChange = async (newData) => {
-    try {
-      await axiosInstance.post('/excel/save', newData);
-      setExcelData(newData);
-      // Also save to localStorage
-      try {
-        localStorage.setItem('excelData', JSON.stringify(newData));
-      } catch (e) {
-        console.error('Failed to save Excel data:', e);
-      }
-    } catch (error) {
-      console.error('Failed to save Excel data:', error);
-    }
-  };
-
-  // Add separate handler for Excel Editor data changes
-  const handleExcelEditorDataChange = async (newData) => {
-    try {
-      await axiosInstance.post('/excelEditor/save', newData);
-      setExcelEditorData(newData);
-      try {
-        localStorage.setItem('excelEditorData', JSON.stringify(newData));
-      } catch (e) {
-        console.error('Failed to save Excel Editor data:', e);
-      }
-    } catch (error) {
-      console.error('Failed to save Excel Editor data:', error);
-    }
   };
 
   // Add Excel Editor to the available tabs
@@ -395,11 +191,11 @@ function App() {
       case 'upload':
         return (
           <EnhancedFileUpload 
-            onIraUploadSuccess={handleIraData} 
-            onCcUploadSuccess={handleCcData} 
-            onLoading={handleLoading} 
-            onError={handleError} 
-            onSuccess={handleSuccess} 
+            onIraUploadSuccess={dataHandlers.handleIraData}
+            onCcUploadSuccess={dataHandlers.handleCcData}
+            onLoading={uiHandlers.handleLoading}
+            onError={uiHandlers.handleError}
+            onSuccess={uiHandlers.handleSuccess}
             hasIraPowerBi={iraPowerBiUsed}
             hasCcPowerBi={ccPowerBiUsed}
           />
@@ -412,7 +208,7 @@ function App() {
           ccData={ccData || selectedSnapshot?.ccData}
           isHistoricalView={!iraData && !ccData}
           snapshotInfo={selectedSnapshot}
-          onError={handleError}
+          onError={uiHandlers.handleError}
         />;
       case 'historical':
         return <HistoricalDataComponent 
@@ -430,7 +226,7 @@ function App() {
           <ExcelEditor 
             key="excelEditor"
             initialData={excelEditorData} 
-            onDataChange={handleExcelEditorDataChange}
+            onDataChange={excelHandlers.handleExcelEditorDataChange}
           />
         );
       default:
@@ -450,14 +246,6 @@ function App() {
     localStorage.removeItem('excelEditorData');
   };
 
-  // Add isAuthenticated state at the top with other states
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isAuthenticated') === 'true';
-  });
-
-  // Add auth state
-  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
-
   useEffect(() => {
     // Update axios token when it changes
     if (authToken) {
@@ -467,29 +255,19 @@ function App() {
     }
   }, [authToken]);
 
-  // Keep only the final enhanced versions:
-  const handleLogout = () => {
-    setAuthToken(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
-    setActiveTab('upload');
+  const handleDeleteColumn = (columnToDelete) => {
+    dataHandlers.handleDeleteColumn(columnToDelete, iraData, ccData);
   };
 
-  const handleLogin = async (token) => {
-    if (token) {
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('isAuthenticated', 'true');
-      setAuthToken(token);
-      setIsAuthenticated(true);
-      setActiveTab('upload');
-    }
+  const handleDeleteRow = (rowIndex) => {
+    dataHandlers.handleDeleteRow(rowIndex, iraData, ccData);
   };
 
   // Modify return statement to check authentication
   return (
     <>
       {!isAuthenticated ? (
-        <Login onLogin={handleLogin} />
+        <Login onLogin={loginHandler} />
       ) : (
         <div className="app-layout">
           <TopNav 
@@ -498,7 +276,7 @@ function App() {
             hasData={!!(iraData || ccData)}
             hasIraData={!!iraData}
             hasCcData={!!ccData}
-            onLogout={handleLogout}  // Add this line to pass the logout handler
+            onLogout={logoutHandler}  // Add this line to pass the logout handler
           />
 
           <div className="main-content-wrapper">
