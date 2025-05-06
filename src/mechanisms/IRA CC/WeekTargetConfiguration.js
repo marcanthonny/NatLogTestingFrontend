@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button, Nav, Tab } from 'react-bootstrap';
 import '../../interfaces/css/components/WeekTargetConfiguration.css';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
 
 function WeekTargetConfiguration({ show, onHide, onUpdate }) {
   const [targets, setTargets] = useState({
@@ -24,8 +24,8 @@ function WeekTargetConfiguration({ show, onHide, onUpdate }) {
   useEffect(() => {
     const loadConfigs = async () => {
       try {
-        const response = await axios.get('/api/week-config');
-        if (Object.keys(response.data).length > 0) {
+        const response = await axiosInstance.get('/week-config');
+        if (response.data && Object.keys(response.data).length > 0) {
           setTargets(response.data);
         }
       } catch (error) {
@@ -49,8 +49,8 @@ function WeekTargetConfiguration({ show, onHide, onUpdate }) {
 
   const handleSave = async () => {
     try {
-      // Save to backend
-      await axios.post('/api/week-config', targets);
+      // Save to backend with auth
+      await axiosInstance.post('/week-config', targets);
       
       // Keep localStorage as backup
       localStorage.setItem('weekTargetSettings', JSON.stringify(targets));
