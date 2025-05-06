@@ -16,7 +16,7 @@ export const fetchAllSnapshots = async () => {
 
 export const deleteSnapshot = async (id) => {
   try {
-    const response = await axiosInstance.delete(`/api/snapshots/${id}`);
+    const response = await axiosInstance.delete(`/snapshots/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error deleting snapshot ${id}:`, error);
