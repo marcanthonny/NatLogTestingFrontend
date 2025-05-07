@@ -5,6 +5,7 @@ import '../../interfaces/css/components/HistoricalDataComponent.css';
 import { getSnapshotStorageLocation, exportLocalSnapshots, importLocalSnapshots } from '../../utils/snapshotUtils';
 import { getApiUrl } from '../../config/api';
 import { deleteSnapshot, fetchSnapshotById } from '../../utils/databaseUtils';
+import { hasPermission } from '../../utils/permissionUtils';
 
 const VALID_BRANCHES = [
   '1982 - PT. APL JAYAPURA',
@@ -211,6 +212,10 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
 
   // Process and save current data as a weekly snapshot
   const saveCurrentSnapshot = async () => {
+    if (!hasPermission('create:snapshots')) {
+      setError('You do not have permission to create snapshots');
+      return;
+    }
     if (!snapshotName.trim()) {
       alert('Please enter a name for this week\'s snapshot.');
       return;
@@ -665,6 +670,10 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
 
   // Fix delete handler to properly remove snapshot and update UI
   const handleDeleteSnapshot = async (id) => {
+    if (!hasPermission('delete:snapshots')) {
+      setError('You do not have permission to delete snapshots');
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this snapshot?')) {
       return;
     }
@@ -766,7 +775,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                   <button 
                     className="btn btn-primary w-100" 
                     onClick={saveCurrentSnapshot}
-                    disabled={!snapshotName.trim() || !snapshotDate || !iraData || !ccData || loading}
+                    disabled={!snapshotName.trim() || !snapshotDate || !iraData || !ccData || loading || !hasPermission('create:snapshots')}
                   >
                     {loading ? (
                       <>
@@ -911,16 +920,18 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
                               <i className="bi bi-file-excel"></i>
                             </button>
                           )}
-                          <button 
-                            className="btn btn-sm btn-outline-danger" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteSnapshot(snapshot.id);
-                            }}
-                            title="Delete snapshot"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </button>
+                          {hasPermission('delete:snapshots') && (
+                            <button 
+                              className="btn btn-sm btn-outline-danger" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteSnapshot(snapshot.id);
+                              }}
+                              title="Delete snapshot"
+                            >
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

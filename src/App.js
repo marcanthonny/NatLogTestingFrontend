@@ -11,6 +11,7 @@ import './interfaces/css/Dashboard.css';
 
 // Import utilities and helpers
 import { getAuthToken, setAuthToken } from './utils/authUtils';
+import { setUserRole } from './utils/permissionUtils';
 
 // Then import components
 import Login from './interfaces/Auth/Login';
@@ -168,6 +169,19 @@ function App() {
     if (token) {
       setAuthToken(token);
       setIsAuthenticated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // When user logs in, set their role and permissions
+    const handleLogin = (userData) => {
+      setUserRole(userData.role, userData.permissions);
+    };
+
+    // Initialize on app load if user is already logged in
+    const user = getCurrentUser(); // Your existing user getter
+    if (user) {
+      setUserRole(user.role, user.permissions);
     }
   }, []);
 
