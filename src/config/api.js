@@ -1,9 +1,8 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://aplnatlog-backend.vercel.app';
+import { createClient } from '@supabase/supabase-js';
 
-export const getApiUrl = (endpoint) => {
-  // Remove leading slashes and extra 'api/' from endpoint
-  const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/^api\/+/, '');
-  return `${API_BASE_URL}/api/${cleanEndpoint}`;
-};
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
 
-export default API_BASE_URL;
+export default supabase;
