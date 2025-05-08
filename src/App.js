@@ -10,7 +10,7 @@ import './interfaces/css/App.css';
 import './interfaces/css/Dashboard.css';
 
 // Import utilities and helpers
-import { getAuthToken, setAuthToken } from './utils/authUtils';
+import { getAuthToken, setAuthToken, getCurrentUser } from './utils/authUtils';
 import { setUserRole } from './utils/permissionUtils';
 
 // Then import components
@@ -179,7 +179,7 @@ function App() {
     };
 
     // Initialize on app load if user is already logged in
-    const user = getCurrentUser(); // Your existing user getter
+    const user = getCurrentUser();
     if (user) {
       setUserRole(user.role, user.permissions);
     }
