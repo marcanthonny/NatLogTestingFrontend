@@ -1,0 +1,124 @@
+.user-settings-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1rem;
+  align-items: left;
+  align-self: left;
+}
+
+.settings-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #00a098;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.settings-card h2 {
+  margin-bottom: 1.5rem;
+  color: #346194;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: bold;
+  font-size: larger;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #346194;
+  border-radius: 4px;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.password-requirements {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.password-requirements div,
+.password-match {
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.requirement-met {
+  color: #2F4F4F;
+}
+
+.requirement-met i {
+  color: #28a745;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background-color: #000000;
+  border-color: #000000;
+}
+
+.btn-primary:hover {
+  background-color: #333;
+  border-color: #333;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.alert-success {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+@media (max-width: 768px) {
+  .settings-card {
+    padding: 1rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .container-fluid {
+    padding: 0.5rem;
+  }
+  
+  .settings-card {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

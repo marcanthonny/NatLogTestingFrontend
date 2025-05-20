@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axiosInstance from './utils/axiosConfig'; 
 
 // Translation context should be imported before components that use it
-import { useLanguage } from './mechanisms/General/LanguageContext';
+import { useLanguage } from './mechanisms/General/LanguageContext'; // <-- FIXED import path
 
 // Import styles before components
 import './interfaces/css/App.css';
@@ -21,6 +21,9 @@ import DataView from './mechanisms/IRA CC/DataView';
 import IraCcDashboard from './interfaces/IraCcComponents/IraCcDashboard';
 import HistoricalDataComponent from './mechanisms/IRA CC/HistoricalDataComponent';
 import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
+import UnifiedDashboard from './interfaces/UnifiedDashboard';
+import UserSettings from './interfaces/Auth/UserSettings';
+import Sidebar from './interfaces/generals/Sidebar';
 
 import { handleLogin, handleLogout } from './mechanisms/Handlers/AuthHandlers';
 import { createDataHandlers } from './mechanisms/Handlers/DataHandlers';
@@ -29,8 +32,11 @@ import { createUIHandlers } from './mechanisms/Handlers/UIHandlers';
 import { createHistoryHandlers } from './mechanisms/Handlers/HistoryHandlers';
 import { createAuthHandlers } from './mechanisms/Handlers/AuthHandlers';
 
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+
 function App() {
   const { translate } = useLanguage();
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   // Move auth states to top
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -44,7 +50,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [activeTab, setActiveTab] = useState('upload');
   
   // Track PowerBI data usage
   const [iraPowerBiUsed, setIraPowerBiUsed] = useState(false);
@@ -95,8 +100,7 @@ function App() {
   
   const { loginHandler, logoutHandler } = createAuthHandlers(
     setAuthToken, 
-    setIsAuthenticated, 
-    setActiveTab
+    setIsAuthenticated
   );
   
   const dataHandlers = createDataHandlers(
@@ -150,14 +154,14 @@ function App() {
   // When data is loaded, switch to the data tab
   useEffect(() => {
     if (iraData || ccData) {
-      setActiveTab('data');
+      // setActiveTab('data'); // REMOVE this line
     }
   }, [iraData, ccData]);
 
   // Add effect to handle page reloads
   useEffect(() => {
     // Reset to upload tab when page is loaded/reloaded
-    setActiveTab('upload');
+    // setActiveTab('upload'); // REMOVE this line
     // Clear any stored data
     clearExcelData();
   }, []); // Empty dependency array means this runs once on mount
@@ -176,63 +180,52 @@ function App() {
     setLanguage(prev => prev === 'en' ? 'id' : 'en');
   };
 
-  // Add Excel Editor to the available tabs
-  const tabs = [
-    { id: 'upload', label: translate('sidebar.upload'), icon: 'bi-cloud-upload' },
-    { id: 'data', label: translate('sidebar.dataView'), icon: 'bi-table' },
-    { id: 'dashboard', label: translate('sidebar.dashboard'), icon: 'bi-graph-up' },
-    { id: 'historical', label: translate('sidebar.historicalData'), icon: 'bi-clock-history' },
-    { id: 'excelEditor', label: 'Excel Editor', icon: 'bi-file-earmark-spreadsheet' }
-  ];
+  // Router-aware TopNav
+  function TopNavWithRouter(props) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    // Map routes to tab names for highlighting
+    const routeTabMap = {
+      '/ira-cc': 'unified',
+      '/analysis': 'comprehensive',
+      '/excel-editor': 'excelEditor'
+    };
+    const activeTab = routeTabMap[location.pathname] || '';
 
-  // Render content based on the active tab
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'upload':
-        return (
-          <EnhancedFileUpload 
-            onIraUploadSuccess={dataHandlers.handleIraData}
-            onCcUploadSuccess={dataHandlers.handleCcData}
-            onLoading={uiHandlers.handleLoading}
-            onError={uiHandlers.handleError}
-            onSuccess={uiHandlers.handleSuccess}
-            hasIraPowerBi={iraPowerBiUsed}
-            hasCcPowerBi={ccPowerBiUsed}
-          />
-        );
-      case 'data':
-        return <DataView iraData={iraData} ccData={ccData} />;
-      case 'dashboard':
-        return <IraCcDashboard 
-          iraData={iraData || selectedSnapshot?.iraData} 
-          ccData={ccData || selectedSnapshot?.ccData}
-          isHistoricalView={!iraData && !ccData}
-          snapshotInfo={selectedSnapshot}
-          onError={uiHandlers.handleError}
-        />;
-      case 'historical':
-        return <HistoricalDataComponent 
-          iraData={iraData} 
-          ccData={ccData}
-          onSnapshotSelect={(snapshot) => {
-            setSelectedSnapshot(snapshot);
-            setActiveTab('dashboard'); // Automatically switch to dashboard
-          }}
-        />;
-      case 'comprehensive':
-        return <ComprehensiveDashboard />;
-      case 'excelEditor':
-        return (
-          <ExcelEditor 
-            key="excelEditor"
-            initialData={excelEditorData} 
-            onDataChange={excelHandlers.handleExcelEditorDataChange}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+    const handleLogout = () => {
+      logoutHandler();
+      navigate('/login');
+    };
+
+    return (
+      <TopNav
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          // Map tab to route
+          if (tab === 'unified') navigate('/ira-cc');
+          else if (tab === 'comprehensive') navigate('/analysis');
+          else if (tab === 'excelEditor') navigate('/excel-editor');
+        }}
+        onLogout={handleLogout}
+        {...props}
+      />
+    );
+  }
+
+  // Main content with routes
+  function MainContent() {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/ira-cc" replace />} />
+        <Route path="/settings" element={<UserSettings />} />
+        <Route path="/ira-cc" element={<UnifiedDashboard />} />
+        <Route path="/analysis" element={<ComprehensiveDashboard />} />
+        <Route path="/excel-editor" element={<ExcelEditor initialData={excelEditorData} onDataChange={excelHandlers.handleExcelEditorDataChange} />} />
+        {/* Add more routes as needed */}
+        <Route path="*" element={<div className="alert alert-danger">Page not found</div>} />
+      </Routes>
+    );
+  }
 
   // Add a cleanup function for when you intentionally want to clear the Excel data
   const clearExcelData = () => {
@@ -265,63 +258,38 @@ function App() {
 
   // Modify return statement to check authentication
   return (
-    <>
+    <Router>
       {!isAuthenticated ? (
         <Login onLogin={loginHandler} />
       ) : (
         <div className="app-layout">
-          <TopNav 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
+          <TopNav
             hasData={!!(iraData || ccData)}
             hasIraData={!!iraData}
             hasCcData={!!ccData}
-            onLogout={logoutHandler}  // Add this line to pass the logout handler
+            onLogout={logoutHandler}
           />
-
-          <div className="main-content-wrapper">
+          <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
+          <div className={`main-content-wrapper ${sidebarExpanded ? 'sidebar-expanded' : ''}`}>
             <div className="main-content">
-              {/* Display success message */}
               {success && (
                 <div className="alert alert-success mt-3">
                   <i className="bi bi-check-circle me-2"></i>
                   {success}
                 </div>
               )}
-              
-              {/* Display error message */}
               {error && (
                 <div className="alert alert-danger mt-3">
                   <i className="bi bi-exclamation-triangle me-2"></i>
                   Error: {error}
                 </div>
               )}
-              
-              {renderContent()}
+              <MainContent />
             </div>
           </div>
-          
-          {/* Hidden buttons for export functionality */}
-          <button 
-            id="exportDropdown" 
-            className="d-none"
-            onClick={() => {
-              const toolbarExport = document.querySelector('.dropdown-item[onClick*="xlsx"]');
-              if (toolbarExport) toolbarExport.click();
-            }}
-          ></button>
-          
-          <button 
-            id="exportDropdownCSV" 
-            className="d-none"
-            onClick={() => {
-              const toolbarExport = document.querySelector('.dropdown-item[onClick*="csv"]');
-              if (toolbarExport) toolbarExport.click();
-            }}
-          ></button>
         </div>
       )}
-    </>
+    </Router>
   );
 }
 

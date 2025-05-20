@@ -16,7 +16,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post('auth/login', {
+      const response = await axiosInstance.post('/auth/login', {
         username: username.trim().toLowerCase(),
         password
       });
@@ -25,12 +25,14 @@ const Login = ({ onLogin }) => {
         // Store token in localStorage before calling onLogin
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         onLogin(response.data.token, response.data.user.role);
       } else {
-        setError('Invalid credentials');
+        setError('Invalid response from server');
         setLoading(false);
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.response?.data?.error || 'Invalid credentials');
       setLoading(false);
     }

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../../mechanisms/General/LanguageContext';
 import '../css/TopNav.css';
 
 function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLogout }) {
   const { translate } = useLanguage(); // Add this line to extract translate function
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -67,7 +69,8 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
   const isGroupActive = (group) => {
     switch (group) {
       case 'ira':
-        return activeGroup === 'ira' || ['upload', 'dashboard', 'data', 'historical', 'comprehensive'].includes(activeTab);
+        // Only highlight if unified or comprehensive is active
+        return activeGroup === 'ira' || ['unified', 'comprehensive'].includes(activeTab);
       case '5s':
         return activeGroup === '5s' || ['5s'].includes(activeTab);
       default:
@@ -82,8 +85,6 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
       localStorage.removeItem('authToken');
       localStorage.removeItem('isAuthenticated');
       localStorage.removeItem('weekTargetSettings');
-      
-      // Call the provided onLogout handler
       onLogout();
     }
   };
@@ -112,7 +113,7 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
       </div>
 
       <button 
-        className={`nav-toggle ${isMenuOpen ? 'active' : ''}`}
+        className={`nav-toggle d-md-none ${isMenuOpen ? 'active' : ''}`}
         onClick={toggleMenu}
         aria-label="Toggle navigation"
       >
@@ -122,91 +123,67 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
       </button>
 
       <div className="container-fluid">
-        <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
-          <a 
-            href="#"
-            className={`nav-link ${activeTab === 'excelEditor' ? 'active' : ''}`}
-            onClick={(e) => handleNavClick('excelEditor', e)}
+        {/* Mobile-only navigation links */}
+        <div className={`nav-links d-md-none ${isMenuOpen ? 'active' : ''}`}>
+          <Link
+            to="/excel-editor"
+            className={`nav-link ${location.pathname === '/excel-editor' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
           >
             {translate('sidebar.excelEditor')}
-          </a>
+          </Link>
 
-          <div className={`nav-group ${isGroupActive('ira') ? 'active' : ''}`}>
-            <a href="#" className="nav-link" onClick={() => toggleGroup('ira')}>
-              IRA CC Tools
-            </a>
-            <div className="nav-group-menu">
-              <a 
-                href="#"
-                className={`nav-link ${activeTab === 'upload' ? 'active' : ''}`}
-                onClick={(e) => handleNavClick('upload', e)}
-              >
-                Upload
-              </a>
-              <a 
-                href="#"
-                className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`}
-                onClick={(e) => handleNavClick('dashboard', e)}
-              >
-                IRA CC Dashboard
-              </a>
-              <a 
-                href="#"
-                className={`nav-link ${activeTab === 'data' ? 'active' : ''} ${!hasIraData && !hasCcData ? 'disabled-link' : ''}`}
-                onClick={(e) => handleNavClick('data', e)}
-              >
-                Data View
-                {!hasIraData && !hasCcData && <small className="ms-2 text-muted">(Needs data)</small>}
-              </a>
-              <a 
-                href="#"
-                className={`nav-link ${activeTab === 'historical' ? 'active' : ''}`}
-                onClick={(e) => handleNavClick('historical', e)}
-              >
-                Historical Dashboard
-              </a>
-              <a 
-                href="#"
-                className={`nav-link ${activeTab === 'comprehensive' ? 'active' : ''}`}
-                onClick={(e) => handleNavClick('comprehensive', e)}
-              >
-                <i className="bi bi-graph-up-arrow"></i> Analysis
-              </a>
-              {/* ...existing IRA CC menu items... */}
-            </div>
-          </div>
+          <Link
+            to="/ira-cc"
+            className={`nav-link ${location.pathname === '/ira-cc' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            IRA CC Tools
+          </Link>
 
-          <div className={`nav-group ${isGroupActive('5s') ? 'active' : ''}`}>
-            <a href="#" className="nav-link" onClick={() => toggleGroup('5s')}>
-              5S Scoring Tools
-            </a>
-            <div className="nav-group-menu">
-              {/* ...existing 5S menu items... */}
-            </div>
-          </div>
-          <div className={`nav-group ${isGroupActive('BatchCorr') ? 'active' : ''}`}>
-            <a href="#" className="nav-link" onClick={() => toggleGroup('BatchCorr')}>
-              Batch Correction
-            </a>
-            <div className="nav-group-menu">
-            <a 
-                href="#"
-                className={`nav-link ${activeTab === 'formSummary' ? 'active' : ''}`}
-                onClick={(e) => handleNavClick('upload', e)}
-              >
-                 Form Summary
-              </a>
-              <a 
-                href="#"
-                className={`nav-link ${activeTab === 'formEditor' ? 'active' : ''}`}
-                onClick={(e) => handleNavClick('dashboard', e)}
-              >
-                Form Editor
-              </a>
-            </div>
-          </div>
+          <Link
+            to="/analysis"
+            className={`nav-link ${location.pathname === '/analysis' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Analysis
+          </Link>
 
-          {/* Update logout button to use handleLogoutClick */}
+          <Link
+            to="/5s-scoring"
+            className={`nav-link ${location.pathname === '/5s-scoring' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            5S Scoring Tools
+          </Link>
+
+          <Link
+            to="/form-summary"
+            className={`nav-link ${location.pathname === '/form-summary' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Form Summary
+          </Link>
+
+          <Link
+            to="/form-editor"
+            className={`nav-link ${location.pathname === '/form-editor' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Form Editor
+          </Link>
+        </div>
+
+        {/* Always visible user controls */}
+        <div className="user-controls ms-auto">
+          <Link
+            to="/settings"
+            className="user-menu-button"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <i className="bi bi-person-circle"></i>
+            {localStorage.getItem('username') || ' User'}
+          </Link>
           <a href="#" className="logout-button" onClick={handleLogoutClick}>
             <i className="bi bi-box-arrow-right"></i>
             Logout

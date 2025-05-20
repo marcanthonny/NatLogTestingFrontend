@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types'; // Add this import
 import * as XLSX from 'xlsx';
 import axios from 'axios';
-import { useLanguage } from '../../context/LanguageContext';
 
 const VALID_BRANCHES = [
   '1982 - PT. APL JAYAPURA',
@@ -288,12 +287,12 @@ const processIraDataCore = (data) => {
 
     let isIraLine = false;
     const iraValue = row['%IRALine'];
-    const countStatus = row['Count Status'];
+    const countStatus = row['Ind_IRALine'];
     const branch = branchColumn ? row[branchColumn] : null;
 
     // Enhanced IRA line detection
     if (iraValue === 1 || iraValue === '1' || iraValue === true || 
-        iraValue === 'true' || countStatus === 'Counted') {
+        iraValue === 'true' || countStatus === 'Match') {
       isIraLine = true;
       countedItems++;
     }
@@ -802,7 +801,6 @@ const createEmailDraft = async () => {
 };
 
 function IraCcDashboard({ iraData, ccData, snapshotInfo, onError }) { // Add onError prop
-  const { translate } = useLanguage();
   const {
     iraStats,
     ccStats,
@@ -823,7 +821,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo, onError }) { // Add onE
       {error && (
         <div className="alert alert-danger">
           <i className="bi bi-exclamation-triangle-fill me-2"></i>
-          {translate('common.error')}: {error}
+          Error: {error}
         </div>
       )}
 
@@ -831,7 +829,7 @@ function IraCcDashboard({ iraData, ccData, snapshotInfo, onError }) { // Add onE
         <div className="col-md-6">
           <div className="card">
             <div className="card-header">
-              <h5>{translate('dashboard.iraStats')}</h5>
+              <h5>IRA Stats</h5>
             </div>
             {/* ...rest of the IRA stats... */}
           </div>
