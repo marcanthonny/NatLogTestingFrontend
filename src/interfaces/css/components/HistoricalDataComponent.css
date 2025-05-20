@@ -85,6 +85,22 @@
   border-left: 4px solid #ffc107;
 }
 
+.snapshots-filter {
+  padding: 12px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.snapshots-filter .form-select {
+  font-size: 0.9rem;
+}
+
+.no-snapshots {
+  padding: 1rem;
+  text-align: center;
+  color: #6c757d;
+}
+
 @media screen and (max-width: 1700px) {
   .btn-group .btn {
     width: 100%;

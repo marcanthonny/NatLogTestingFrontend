@@ -9,18 +9,26 @@
 
 .main-content-wrapper {
   margin-left: 0;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, width 0.3s ease;
   min-height: 100vh;
-  padding-top: 60px;
+  padding-top: 56px;
+  width: 100%;
 }
 
 @media (min-width: 768px) {
   .main-content-wrapper {
     margin-left: 250px; /* Sidebar width */
+    width: calc(100% - 250px);
+    transition: all 0.3s ease;
   }
 
   .main-content-wrapper.sidebar-collapsed {
     margin-left: 60px;
+    width: calc(100% - 60px);
+  }
+
+  .top-nav.sidebar-collapsed {
+    padding-left: 60px;
   }
 }
 

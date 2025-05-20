@@ -1,15 +1,15 @@
 .sidebar {
   position: fixed;
-  top: 60px; /* Height of TopNav */
+  top: 56px;
   left: 0;
-  height: calc(100vh - 60px);
-  background-image: linear-gradient(rgba(0, 0, 0, 0.363), rgba(0, 0, 0, 0.315)),
+  height: calc(100vh - 56px);
+  background-image: linear-gradient(rgba(0, 73, 82, 0.637), rgba(43, 141, 187, 0.548)),
     url('/src/images/sidebar-bg.png');
   background-size: cover;
   background-position: center;
-  transition: width 0.3s ease;
+  transition: all 0.3s ease;
   z-index: 1000;
-  color: white;
+  color: rgb(255, 255, 255);
 }
 
 .sidebar.expanded {
@@ -42,7 +42,7 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  color: white;
+  color: rgb(255, 255, 255);
   text-decoration: none;
   transition: background-color 0.2s;
   white-space: nowrap;
@@ -66,5 +66,19 @@
 @media (max-width: 768px) {
   .sidebar {
     display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: 60px;
+  }
+
+  .sidebar.expanded {
+    width: 250px;
   }
 }

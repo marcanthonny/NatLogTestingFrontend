@@ -4,32 +4,25 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1030;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   height: 56px;
+  background: white;
+  z-index: 1030;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.container-fluid {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
 }
 
 .nav-brand {
-  position: absolute;
-  left: 0;
-  padding-left: 1rem;
-  height: 40px;
+  height: 100%;
   display: flex;
   align-items: center;
-}
-
-.nav-brand img {
-  height: 36px;
-  width: auto;
-}
-
-.user-controls {
-  position: absolute;
-  right: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  padding-left: 20px; /* Add padding to the logo container */
 }
 
 /* Mobile dropdown behavior */
@@ -173,36 +166,28 @@
 
   .nav-links {
     position: fixed;
-    top: 0;
-    left: -250px;
-    width: 250px;
-    height: 100vh;
-    background-color: #f8f9fa;
+    top: 56px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 56px);
+    background-color: white;
+    padding: 1rem;
     flex-direction: column;
-    padding: 60px 0 60px 0; /* Adjusted padding to make room for logout */
-    gap: 0;
-    transition: left 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    display: flex; /* Add this to ensure flex layout works */
+    transition: transform 0.3s ease;
+    transform: translateX(-100%);
+    display: flex !important;
+    z-index: 1029;
   }
 
   .nav-links.active {
-    left: 0;
+    transform: translateX(0);
   }
 
   .nav-link {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
+    padding: 1rem;
     width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .nav-link i {
-    width: 20px;
+    display: block;
+    border-bottom: 1px solid #eee;
   }
 
   .nav-group {
@@ -270,12 +255,22 @@
 
 @media (min-width: 768px) {
   .top-nav {
-    padding-left: 270px; /* Sidebar width + padding */
+    padding-left: 250px;
     transition: padding-left 0.3s ease;
   }
 
+  .nav-brand {
+    padding-left: 0;
+    margin-left: -250px;
+    transition: margin-left 0.3s ease;
+  }
+
   .top-nav.sidebar-collapsed {
-    padding-left: 80px;
+    padding-left: 60px;
+  }
+
+  .top-nav.sidebar-collapsed .nav-brand {
+    margin-left: -60px;
   }
 
   .nav-links {

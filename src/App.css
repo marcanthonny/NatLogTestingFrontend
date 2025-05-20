@@ -1,4 +1,4 @@
-```css
+/* App.css */
 .main-content {
     padding-top: 56px; /* Height of TopNav */
     min-height: 100vh;
@@ -48,4 +48,3 @@ button {
         display: none;
     }
 }
-```

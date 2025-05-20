@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import * as XLSX from 'xlsx';
 import axiosInstance from '../../utils/axiosConfig';
+import { format } from 'date-fns';
 import '../../interfaces/css/components/HistoricalDataComponent.css';
 import { getSnapshotStorageLocation, exportLocalSnapshots, importLocalSnapshots } from '../../utils/snapshotUtils';
 import { getApiUrl } from '../../config/api';
@@ -32,8 +34,11 @@ const VALID_BRANCHES = [
   '1960 - PT. APL MANADO'
 ];
 
-function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
-  const [weeklySnapshots, setWeeklySnapshots] = useState([]);
+const HistoricalDataComponent = ({ iraData, ccData, onSnapshotSelect }) => {
+  const [snapshots, setSnapshots] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedWeek, setSelectedWeek] = useState('all');
+  const [filteredSnapshots, setFilteredSnapshots] = useState([]);
   const [snapshotName, setSnapshotName] = useState('');
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -98,7 +103,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
           (snapshot.ccPercentage !== undefined ? snapshot.ccPercentage : 0)
       }));
 
-      setWeeklySnapshots(processedSnapshots);
+      setSnapshots(processedSnapshots);
       console.log('Loaded snapshots from server:', processedSnapshots.length);
       
       // Save backup
@@ -121,10 +126,10 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       const backup = localStorage.getItem('weeklySnapshots_backup');
       if (backup) {
         const parsedBackup = JSON.parse(backup);
-        setWeeklySnapshots(parsedBackup);
+        setSnapshots(parsedBackup);
         setError('Server unavailable. Showing backup data which may not be current.');
       } else {
-        setWeeklySnapshots([]);
+        setSnapshots([]);
         setError('Server unavailable and no backup data found.');
       }
     } catch (localError) {
@@ -675,7 +680,7 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       await deleteSnapshot(id);
       
       // Update local state to remove the deleted snapshot
-      setWeeklySnapshots(prev => prev.filter(s => s.id !== id));
+      setSnapshots(prev => prev.filter(s => s.id !== id));
       
       // Clear selected snapshot if it was the one deleted
       if (selectedSnapshot?.id === id) {
@@ -702,6 +707,60 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
     setError(null);
     // Auto-clear success message after 5 seconds
     setTimeout(() => setSuccess(null), 5000);
+  };
+
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+  const filterSnapshots = () => {
+    let filtered = [...snapshots];
+
+    if (selectedMonth !== 'all') {
+      filtered = filtered.filter(s => 
+        format(new Date(s.date), 'MMMM') === selectedMonth
+      );
+    }
+
+    if (selectedWeek !== 'all') {
+      filtered = filtered.filter(s => s.name.includes(selectedWeek));
+    }
+
+    // If no filters, show only latest 10
+    if (selectedMonth === 'all' && selectedWeek === 'all') {
+      filtered = filtered
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 10);
+    }
+
+    setFilteredSnapshots(filtered);
+  };
+
+  useEffect(() => {
+    filterSnapshots();
+  }, [selectedMonth, selectedWeek, snapshots]);
+
+  // Validate props
+  HistoricalDataComponent.propTypes = {
+    iraData: PropTypes.object,
+    ccData: PropTypes.object,
+    onSnapshotSelect: PropTypes.func.isRequired
+  };
+
+  HistoricalDataComponent.defaultProps = {
+    iraData: null,
+    ccData: null
   };
 
   return (
@@ -847,32 +906,60 @@ function HistoricalDataComponent({ iraData, ccData, onSnapshotSelect }) {
       <div className="row">
         <div className="col-lg-5">
           <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Saved Weekly Snapshots</h5>
-              <button 
-                className="btn btn-sm btn-outline-primary" 
-                onClick={loadHistoricalData}
-                disabled={loading}
-              >
-                <i className="bi bi-arrow-clockwise me-1"></i>
-                Refresh
-              </button>
+            <div className="card-header">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5 className="mb-0">Saved Weekly Snapshots</h5>
+                <button 
+                  className="btn btn-sm btn-outline-primary" 
+                  onClick={loadHistoricalData}
+                  disabled={loading}
+                >
+                  <i className="bi bi-arrow-clockwise me-1"></i>
+                  Refresh
+                </button>
+              </div>
+              <div className="row g-2">
+                <div className="col">
+                  <select 
+                    value={selectedMonth} 
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="form-select form-select-sm"
+                  >
+                    <option value="all">All Months</option>
+                    {months.map(month => (
+                      <option key={month} value={month}>{month}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col">
+                  <select 
+                    value={selectedWeek} 
+                    onChange={(e) => setSelectedWeek(e.target.value)}
+                    className="form-select form-select-sm"
+                  >
+                    <option value="all">All Weeks</option>
+                    {['W1', 'W2', 'W3', 'W4'].map(week => (
+                      <option key={week} value={week}>{week}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
             <div className="card-body p-0">
-              {loading && !weeklySnapshots.length ? (
+              {loading && !snapshots.length ? (
                 <div className="text-center p-4">
                   <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </div>
                 </div>
-              ) : weeklySnapshots.length === 0 ? (
+              ) : filteredSnapshots.length === 0 ? (
                 <div className="alert alert-info m-3">
                   <i className="bi bi-info-circle me-2"></i>
-                  No weekly snapshots saved yet. Save your first week's data to begin tracking.
+                  No snapshots found for the selected filters.
                 </div>
               ) : (
                 <div className="list-group list-group-flush">
-                  {weeklySnapshots
+                  {filteredSnapshots
                     .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by date, newest first
                     .map(snapshot => (
                     <div 

@@ -91,40 +91,34 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
 
   return (
     <nav className="top-nav">
-      <div className="nav-brand">
-        {/* Replace img with more robust implementation */}
-        <div className="logo-container">
-          <img 
-            src="https://natlogportal.vercel.app/apl-icon-32x32.png"
-            alt="APL Logo"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'block';
-            }}
-          />
-          <span 
-            className="logo-fallback" 
-            style={{ display: 'none', fontSize: '1.5rem', fontWeight: 'bold' }}
-          >
-            APL
-          </span>
-        </div>
-      </div>
-
-      <button 
-        className={`nav-toggle d-md-none ${isMenuOpen ? 'active' : ''}`}
-        onClick={toggleMenu}
-        aria-label="Toggle navigation"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
       <div className="container-fluid">
-        {/* Mobile-only navigation links */}
-        <div className={`nav-links d-md-none ${isMenuOpen ? 'active' : ''}`}>
+        <div className="nav-brand">
+          <div className="logo-container">
+            <img 
+              src="https://natlogportal.vercel.app/apl-icon-32x32.png"
+              alt="APL Logo"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.style.display = 'none';
+                e.target.nextElementSibling.style.display = 'block';
+              }}
+            />
+            <span className="logo-fallback" style={{ display: 'none' }}>APL</span>
+          </div>
+        </div>
+
+        <button 
+          className={`nav-toggle d-md-none ${isMenuOpen ? 'active' : ''}`}
+          onClick={toggleMenu}
+          aria-label="Toggle navigation"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Change this div to be visible on mobile */}
+        <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <Link
             to="/excel-editor"
             className={`nav-link ${location.pathname === '/excel-editor' ? 'active' : ''}`}
