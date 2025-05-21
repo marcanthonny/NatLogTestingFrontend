@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import EnhancedFileUpload from './IraCcComponents/EnhancedFileUpload';
 import IraCcDashboard from './IraCcComponents/IraCcDashboard';
 import HistoricalDataComponent from '../mechanisms/IRA CC/HistoricalDataComponent';
+import DataView from '../mechanisms/IRA CC/DataView';
 // import './UnifiedDashboard.css'; // Uncomment after creating your CSS
 
 function UnifiedDashboard() {
@@ -13,10 +14,9 @@ function UnifiedDashboard() {
   const [success, setSuccess] = useState(null);
   const [selectedSnapshot, setSelectedSnapshot] = useState(null);
 
-  // Handle upload success for IRA and CC
   const handleIraUploadSuccess = (data) => {
     setIraData(data);
-    setSelectedSnapshot(null); // Clear snapshot selection on new upload
+    setSelectedSnapshot(null);
   };
 
   const handleCcUploadSuccess = (data) => {
@@ -24,14 +24,12 @@ function UnifiedDashboard() {
     setSelectedSnapshot(null);
   };
 
-  // Handle snapshot selection from HistoricalDataComponent
   const handleSnapshotSelect = (snapshot) => {
     setSelectedSnapshot(snapshot);
     setIraData(null);
     setCcData(null);
   };
 
-  // Error and loading handlers
   const handleError = (msg) => setError(msg);
   const handleLoading = (isLoading) => setLoading(isLoading);
   const handleSuccess = (msg) => setSuccess(msg);
@@ -39,17 +37,22 @@ function UnifiedDashboard() {
   return (
     <div className="unified-dashboard">
       <div className="unified-dashboard-main">
-        {/* Left: Upload & History */}
+        {/* Left: Upload, Data View & History */}
         <div className="unified-dashboard-left">
-          <EnhancedFileUpload
-            onIraUploadSuccess={handleIraUploadSuccess}
-            onCcUploadSuccess={handleCcUploadSuccess}
-            onLoading={handleLoading}
-            onError={handleError}
-            onSuccess={handleSuccess}
-            hasIraPowerBi={false}
-            hasCcPowerBi={false}
-          />
+          <div className="upload-and-data-view">
+            <EnhancedFileUpload
+              onIraUploadSuccess={handleIraUploadSuccess}
+              onCcUploadSuccess={handleCcUploadSuccess}
+              onLoading={handleLoading}
+              onError={handleError}
+              onSuccess={handleSuccess}
+              hasIraPowerBi={false}
+              hasCcPowerBi={false}
+            />
+            <div className="unified-dashboard-data-view">
+              <DataView />
+            </div>
+          </div>
           <div className="unified-dashboard-history">
             <HistoricalDataComponent
               iraData={iraData}
@@ -58,6 +61,7 @@ function UnifiedDashboard() {
             />
           </div>
         </div>
+
         {/* Right: Dashboard */}
         <div className="unified-dashboard-right">
           <div className="dashboard-view">
@@ -82,6 +86,7 @@ function UnifiedDashboard() {
           </div>
         </div>
       </div>
+
       {/* Global error/success display */}
       <div className="unified-dashboard-messages">
         {error && (

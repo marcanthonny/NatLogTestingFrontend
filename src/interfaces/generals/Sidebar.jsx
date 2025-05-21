@@ -8,33 +8,38 @@ const Sidebar = () => {
 
   const menuItems = [
     {
-      title: 'Excel Editor',
+      title: 'Beranda',
+      path: '/main',
+      icon: 'bi-house-fill'
+    },
+    {
+      title: 'Editor Excel',
       path: '/excel-editor',
       icon: 'bi-file-earmark-spreadsheet'
     },
     {
-      title: 'IRA CC Tools',
+      title: 'Performa Inventory',
       path: '/ira-cc',
       icon: 'bi-graph-up'
     },
     {
-      title: 'Analysis',
+      title: 'Analisa',
       path: '/analysis',
       icon: 'bi-bar-chart'
     },
     {
-      title: '5S Scoring',
+      title: 'Skor 5S',
       path: '/5s-scoring',
       icon: 'bi-clipboard-check'
     },
     {
-      title: 'Form Summary',
-      path: '/form-summary',
+      title: 'Wrong Picking',
+      path: '/wrong-picking',
       icon: 'bi-file-text'
     },
     {
-      title: 'Form Editor',
-      path: '/form-editor',
+      title: 'Innovation Award',
+      path: '/ia',
       icon: 'bi-pencil-square'
     }
   ];

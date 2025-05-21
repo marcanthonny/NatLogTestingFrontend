@@ -182,58 +182,6 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
 
   return (
     <div className="upload-container">
-      {/* Advanced settings toggle */}
-      <div className="advanced-settings-toggle">
-        <button 
-          className="btn btn-link text-dark" 
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
-          <i className={`bi bi-gear me-1`}></i>
-          {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
-        </button>
-      </div>
-
-      {/* Advanced settings panel */}
-      {showAdvanced && (
-        <div className="card settings-card">
-          <div className="card-header">
-            <h5 className="mb-0">Advanced Settings</h5>
-          </div>
-          <div className="card-body">
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="iraPowerBiSwitch"
-                    checked={usePowerBi.ira}
-                    onChange={(e) => setUsePowerBi({...usePowerBi, ira: e.target.checked})}
-                  />
-                  <label className="form-check-label" htmlFor="iraPowerBiSwitch">
-                    Use PowerBI format for IRA data
-                  </label>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="ccPowerBiSwitch"
-                    checked={usePowerBi.cc}
-                    onChange={(e) => setUsePowerBi({...usePowerBi, cc: e.target.checked})}
-                  />
-                  <label className="form-check-label" htmlFor="ccPowerBiSwitch">
-                    Use PowerBI format for CC data
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <div className="card upload-card">
         <div className="card-header">
           <h5 className="mb-0 text-dark">Upload IRA & CC Data</h5>
@@ -387,30 +335,6 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
                     </div>
                   ))
                 )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Info card */}
-      <div className="row mt-4">
-        <div className="col-12">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Optimized Upload Information</h5>
-            </div>
-            <div className="card-body">
-              <h6>Performance Optimizations:</h6>
-              <ul>
-                <li>Uses client-side processing for faster results</li>
-                <li>Automatic chunking for large files</li>
-                <li>Non-blocking UI with Web Workers</li>
-                <li>Optimized memory usage for Excel parsing</li>
-              </ul>
-              <div className="alert alert-info">
-                <i className="bi bi-info-circle me-2"></i>
-                Uploads are processed entirely in your browser for maximum speed. Very large files are automatically chunked for better performance.
               </div>
             </div>
           </div>
