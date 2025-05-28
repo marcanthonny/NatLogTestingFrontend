@@ -971,33 +971,18 @@ const HistoricalDataComponent = ({ iraData, ccData, onSnapshotSelect }) => {
                         <h6 className="mb-1">{snapshot.name}</h6>
                         <small>{formatDate(snapshot.date)}</small>
                       </div>
-                      <div>
-                        <span className="badge bg-primary rounded-pill me-2">
-                          IRA: {(snapshot.iraPercentage || 0).toFixed(1)}%
-                        </span>
-                        <span className="badge bg-info rounded-pill me-2">
-                          CC: {(snapshot.ccPercentage || 0).toFixed(1)}%
-                        </span>
+                      <div className="ms-auto d-flex align-items-center">
                         <div className="btn-group">
                           <button
                             className="btn btn-sm btn-outline-primary"
-                            onClick={() => handleViewSnapshot(snapshot)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewSnapshot(snapshot);
+                            }}
                             title="View in Dashboard/Analyze"
                           >
-                            <i className="bi bi-eye"></i> View
+                            <i className="bi bi-eye"></i>
                           </button>
-                          {selectedSnapshot && selectedSnapshot.id === snapshot.id && (
-                            <button
-                              className="btn btn-sm btn-outline-success"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                exportSnapshotToExcel(selectedSnapshot);
-                              }}
-                              title="Export to Excel"
-                            >
-                              <i className="bi bi-file-excel"></i>
-                            </button>
-                          )}
                           <button 
                             className="btn btn-sm btn-outline-danger" 
                             onClick={(e) => {
@@ -1036,80 +1021,6 @@ const HistoricalDataComponent = ({ iraData, ccData, onSnapshotSelect }) => {
                 </div>
               </div>
               <div className="card-body">
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="card mb-3">
-                      <div className="card-header bg-primary text-white">IRA Summary</div>
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between mb-3">
-                          <div>
-                            <h6>Counted</h6>
-                            <h4>{selectedSnapshot?.iraStats?.counted || 0}</h4>
-                          </div>
-                          <div>
-                            <h6>Not Counted</h6>
-                            <h4>{selectedSnapshot?.iraStats?.notCounted || 0}</h4>
-                          </div>
-                          <div>
-                            <h6>Percentage</h6>
-                            <h4>{selectedSnapshot?.iraStats?.percentage?.toFixed(2) || '0.00'}%</h4>
-                          </div>
-                        </div>
-                        <h6>Top Branches</h6>
-                        <ul className="list-group">
-                          {selectedSnapshot?.iraStats?.branchPercentages
-                            ?.sort((a, b) => b.percentage - a.percentage)
-                            ?.slice(0, 5)
-                            ?.map((branch, index) => (
-                              <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                <span>{getBranchShortName(branch.branch)}</span>
-                                <span className="badge bg-primary rounded-pill">
-                                  {branch.percentage.toFixed(1)}%
-                                </span>
-                              </li>
-                            )) || <li className="list-group-item">No data available</li>}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="col-md-6">
-                    <div className="card mb-3">
-                      <div className="card-header bg-info text-white">CC Summary</div>
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between mb-3">
-                          <div>
-                            <h6>Counted</h6>
-                            <h4>{selectedSnapshot?.ccStats?.counted || 0}</h4>
-                          </div>
-                          <div>
-                            <h6>Not Counted</h6>
-                            <h4>{selectedSnapshot?.ccStats?.notCounted || 0}</h4>
-                          </div>
-                          <div>
-                            <h6>Percentage</h6>
-                            <h4>{selectedSnapshot?.ccStats?.percentage?.toFixed(2) || '0.00'}%</h4>
-                          </div>
-                        </div>
-                        <h6>Top Branches</h6>
-                        <ul className="list-group">
-                          {selectedSnapshot?.ccStats?.branchPercentages
-                            ?.sort((a, b) => b.percentage - a.percentage)
-                            ?.slice(0, 5)
-                            ?.map((branch, index) => (
-                              <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                <span>{getBranchShortName(branch.branch)}</span>
-                                <span className="badge bg-info rounded-pill">
-                                  {branch.percentage.toFixed(1)}%
-                                </span>
-                              </li>
-                            )) || <li className="list-group-item">No data available</li>}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
                 <div className="row">
                   <div className="col-12">
                     <div className="card">

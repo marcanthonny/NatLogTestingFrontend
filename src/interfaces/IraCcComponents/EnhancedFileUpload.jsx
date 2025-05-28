@@ -182,70 +182,94 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
 
   return (
     <div className="upload-container">
-      <div className="card upload-card">
-        <div className="card-header">
-          <h5 className="mb-0 text-dark">Upload IRA & CC Data</h5>
-        </div>
-        <div className="card-body">
-          <div 
-            className={`file-drop-area ${dragging ? 'dragging' : ''}`}
-            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              handleFileSelect([...e.dataTransfer.files]);
-            }}
-            onClick={() => document.getElementById('fileInput').click()}
-          >
-            {selectedIraFile || selectedCcFile ? (
-              <div className="selected-files">
-                {selectedIraFile && (
-                  <div className="selected-file">
-                    <i className="file-icon bi bi-file-earmark-excel"></i>
-                    <span className="file-name">{selectedIraFile.name}</span>
-                    <button 
-                      className="remove-file btn btn-sm btn-outline-danger"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedIraFile(null);
-                      }}
-                    >
-                      <i className="bi bi-x"></i>
-                    </button>
-                  </div>
-                )}
-                {selectedCcFile && (
-                  <div className="selected-file">
-                    <i className="file-icon bi bi-file-earmark-excel"></i>
-                    <span className="file-name">{selectedCcFile.name}</span>
-                    <button 
-                      className="remove-file btn btn-sm btn-outline-danger"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedCcFile(null);
-                      }}
-                    >
-                      <i className="bi bi-x"></i>
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="drop-message">
-                <i className="upload-icon bi bi-cloud-upload"></i>
-                <p className="upload-text">Drag & drop your IRA and CC Excel files here<br/>or click to browse</p>
-                <small className="upload-hint text-muted">Files should contain "IRA" or "CC" in their names</small>
-              </div>
-            )}
-            <input 
-              id="fileInput"
-              type="file"
-              className="file-input"
-              multiple
-              accept=".xlsx,.xls,.csv,.xlsb"
-              onChange={(e) => handleFileSelect([...e.target.files])}
-            />
+          <div className="upload-controls-container">
+            <div 
+              className={`file-drop-area ${dragging ? 'dragging' : ''}`}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragging(true);
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                handleFileSelect([...e.dataTransfer.files]);
+              }}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              {selectedIraFile || selectedCcFile ? (
+                <div className="selected-files">
+                  {selectedIraFile && (
+                    <div className="selected-file">
+                      <i className="file-icon bi bi-file-earmark-excel"></i>
+                      <span className="file-name">{selectedIraFile.name}</span>
+                      <button 
+                        className="remove-file btn btn-sm btn-outline-danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedIraFile(null);
+                        }}
+                      >
+                        <i className="bi bi-x"></i>
+                      </button>
+                    </div>
+                  )}
+                  {selectedCcFile && (
+                    <div className="selected-file">
+                      <i className="file-icon bi bi-file-earmark-excel"></i>
+                      <span className="file-name">{selectedCcFile.name}</span>
+                      <button 
+                        className="remove-file btn btn-sm btn-outline-danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCcFile(null);
+                        }}
+                      >
+                        <i className="bi bi-x"></i>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="drop-message">
+                  <i className="upload-icon bi bi-cloud-upload"></i>
+                  <p className="upload-text">Drag & drop your IRA and CC Excel files here<br/>or click to browse</p>
+                  <small className="upload-hint text-muted">Files should contain "IRA" or "CC" in their names</small>
+                </div>
+              )}
+              <input 
+                id="fileInput"
+                type="file"
+                className="file-input"
+                multiple
+                accept=".xlsx,.xls,.csv,.xlsb"
+                onChange={(e) => handleFileSelect([...e.target.files])}
+              />
+            </div>
+          </div>
+
+          <div className="upload-button-container">
+            <button
+              type="button"
+              className="btn btn-dark px-4"
+              disabled={(!selectedIraFile && !selectedCcFile) || processing.ira || processing.cc}
+              onClick={() => {
+                if (selectedIraFile) handleUpload('ira');
+                if (selectedCcFile) handleUpload('cc');
+              }}
+            >
+              {(processing.ira || processing.cc) ? (
+                <>
+                  <span className="spinner-border spinner-border-sm"></span>
+                  <span className="ms-2">Processing...</span>
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-upload"></i>
+                  <span className="ms-2">Upload Files</span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Progress bars */}
@@ -282,64 +306,6 @@ function EnhancedFileUpload({ onIraUploadSuccess, onCcUploadSuccess, onLoading, 
               </div>
             </div>
           )}
-
-          {/* Upload button */}
-          <div className="mt-3 text-center">
-            <button 
-              type="button"
-              className="btn btn-dark px-4"
-              disabled={(!selectedIraFile && !selectedCcFile) || processing.ira || processing.cc}
-              onClick={() => {
-                if (selectedIraFile) handleUpload('ira');
-                if (selectedCcFile) handleUpload('cc');
-              }}
-            >
-              {(processing.ira || processing.cc) ? (
-                <>
-                  <span className="spinner-border spinner-border-sm"></span>
-                  <span className="ms-2">Processing...</span>
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-upload"></i>
-                  <span className="ms-2">Upload Files</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Log container */}
-      <div className="row mt-4">
-        <div className="col-12">
-          <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Upload Progress Log</h5>
-              <button 
-                className="btn btn-sm btn-outline-secondary"
-                onClick={clearLogs}
-              >
-                <i className="bi bi-trash me-1"></i> Clear Logs
-              </button>
-            </div>
-            <div className="card-body">
-              <div className="log-container" ref={logContainerRef}>
-                {logs.length === 0 ? (
-                  <p className="text-muted text-center">No activity yet. Upload logs will appear here.</p>
-                ) : (
-                  logs.map((log, index) => (
-                    <div key={index} className={`log-entry log-${log.type}`}>
-                      <span className="log-time">[{log.timestamp}]</span>
-                      <span>{log.message}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

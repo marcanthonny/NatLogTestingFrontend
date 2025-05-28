@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import EnhancedFileUpload from './IraCcComponents/EnhancedFileUpload';
 import IraCcDashboard from './IraCcComponents/IraCcDashboard';
 import HistoricalDataComponent from '../mechanisms/IRA CC/HistoricalDataComponent';
-import DataView from '../mechanisms/IRA CC/DataView';
-// import './UnifiedDashboard.css'; // Uncomment after creating your CSS
+import './css/UnifiedDashboard.css'; // Uncommented the import
 
 function UnifiedDashboard() {
   const [iraData, setIraData] = useState(null);
@@ -36,53 +35,45 @@ function UnifiedDashboard() {
 
   return (
     <div className="unified-dashboard">
-      <div className="unified-dashboard-main">
-        {/* Left: Upload, Data View & History */}
-        <div className="unified-dashboard-left">
-          <div className="upload-and-data-view">
-            <EnhancedFileUpload
-              onIraUploadSuccess={handleIraUploadSuccess}
-              onCcUploadSuccess={handleCcUploadSuccess}
-              onLoading={handleLoading}
-              onError={handleError}
-              onSuccess={handleSuccess}
-              hasIraPowerBi={false}
-              hasCcPowerBi={false}
-            />
-            <div className="unified-dashboard-data-view">
-              <DataView />
+      <div className="two-column-layout">
+        {/* Left Column */}
+        <div className="left-column">
+          {/* Container for side-by-side upload and data view - Data View removed */}
+          <div className="upload-and-data-container">
+            <div className="upload-section">
+              <EnhancedFileUpload
+                onIraUploadSuccess={handleIraUploadSuccess}
+                onCcUploadSuccess={handleCcUploadSuccess}
+                onLoading={handleLoading}
+                onError={handleError}
+                onSuccess={handleSuccess}
+                hasIraPowerBi={false}
+                hasCcPowerBi={false}
+              />
             </div>
+            {/* Data View Section was here */}
           </div>
-          <div className="unified-dashboard-history">
+
+          {/* Dashboard Section - moved from right column */}
+          <div className="dashboard-section">
+            <IraCcDashboard
+              iraData={iraData}
+              ccData={ccData}
+              snapshotInfo={selectedSnapshot}
+              onError={handleError}
+            />
+          </div>
+
+        </div>
+
+        {/* Right Column - now only contains History */}
+        <div className="right-column">
+          <div className="history-section">
             <HistoricalDataComponent
               iraData={iraData}
               ccData={ccData}
               onSnapshotSelect={handleSnapshotSelect}
             />
-          </div>
-        </div>
-
-        {/* Right: Dashboard */}
-        <div className="unified-dashboard-right">
-          <div className="dashboard-view">
-            {(iraData && ccData) || selectedSnapshot ? (
-              <IraCcDashboard
-                iraData={iraData}
-                ccData={ccData}
-                snapshotInfo={selectedSnapshot}
-                onError={handleError}
-              />
-            ) : (
-              <div className="dashboard-placeholder">
-                <div>
-                  <span className="dashboard-placeholder-icon" />
-                  <h5>No Data Selected</h5>
-                  <p className="dashboard-placeholder-text">
-                    Upload IRA & CC files or select a historical snapshot to view the dashboard.
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -91,13 +82,11 @@ function UnifiedDashboard() {
       <div className="unified-dashboard-messages">
         {error && (
           <div className="dashboard-error">
-            <span className="dashboard-error-icon" />
             {error}
           </div>
         )}
         {success && (
           <div className="dashboard-success">
-            <span className="dashboard-success-icon" />
             {success}
           </div>
         )}

@@ -1,16 +1,17 @@
 .historical-data-container {
-  padding: 20px;
+  padding: 10px;
+  height: 100%;
 }
 
 .historical-data-container .card {
-  border-radius: 8px;
-  margin-bottom: 20px;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
 
 .historical-data-container .card-header {
   background-color: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
-  padding: 15px 20px;
+  padding: 8px 10px;
 }
 
 .historical-data-container .list-group-item.active {
@@ -26,28 +27,31 @@
 .historical-data-container h4 {
   font-weight: 600;
   margin-bottom: 0;
+  font-size: 0.9rem;
 }
 
 .historical-data-container h6 {
   color: #000000;
   font-weight: 500;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
 }
 
 .historical-data-container .badge {
   font-weight: 500;
-  font-size: 0.85rem;
-  padding: 0.35em 0.65em;
+  font-size: 0.75rem;
+  padding: 0.25em 0.5em;
 }
 
 .historical-data-container .table-responsive {
-  max-height: 400px;
+  max-height: 100%;
   overflow-y: auto;
 }
 
 .historical-data-container .btn-outline-danger {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   line-height: 1;
+  font-size: 0.8rem;
 }
 
 .historical-data-container .btn-outline-danger:hover {

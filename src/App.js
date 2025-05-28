@@ -24,6 +24,7 @@ import ComprehensiveDashboard from './mechanisms/IRA CC/ComprehensiveDashboard';
 import UnifiedDashboard from './interfaces/UnifiedDashboard';
 import UserSettings from './interfaces/Auth/UserSettings';
 import Sidebar from './interfaces/generals/Sidebar';
+import Footer from './components/Footer';
 
 import { handleLogin, handleLogout } from './mechanisms/Handlers/AuthHandlers';
 import { createDataHandlers } from './mechanisms/Handlers/DataHandlers';
@@ -215,15 +216,17 @@ function App() {
   // Main content with routes
   function MainContent() {
     return (
-      <Routes>
-        <Route path="/" element={<Navigate to="/ira-cc" replace />} />
-        <Route path="/settings" element={<UserSettings />} />
-        <Route path="/ira-cc" element={<UnifiedDashboard />} />
-        <Route path="/analysis" element={<ComprehensiveDashboard />} />
-        <Route path="/excel-editor" element={<ExcelEditor initialData={excelEditorData} onDataChange={excelHandlers.handleExcelEditorDataChange} />} />
-        {/* Add more routes as needed */}
-        <Route path="*" element={<div className="alert alert-danger">Page not found</div>} />
-      </Routes>
+      <div className="main-content">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/user-settings" element={<UserSettings />} />
+          <Route path="/ira-cc" element={<UnifiedDashboard />} />
+          <Route path="/analysis" element={<ComprehensiveDashboard />} />
+          <Route path="/excel-editor" element={<ExcelEditor />} />
+          <Route path="/" element={<Navigate to="/ira-cc" replace />} />
+        </Routes>
+        <Footer />
+      </div>
     );
   }
 
