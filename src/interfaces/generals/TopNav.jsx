@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../mechanisms/General/LanguageContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import '../css/TopNav.css';
 
 function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLogout }) {
