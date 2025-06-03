@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const location = useLocation();
+  const { currentUser } = useAuth();
 
   const menuItems = [
     {
@@ -33,9 +35,10 @@ const Sidebar = () => {
       icon: 'bi-clipboard-check'
     },
     {
-      title: 'Wrong Picking',
-      path: 'https://batch-corr-form.vercel.app/',
-      icon: 'bi-file-text'
+      title: 'Admin Wrong Picking',
+      path: `/api/auth/cross-login?token=${localStorage.getItem('authToken')}`,
+      icon: 'bi-file-text',
+      isAdminOnly: true
     },
     {
       title: 'Innovation Award',
@@ -57,8 +60,19 @@ const Sidebar = () => {
         {menuItems.map((item, index) => (
           <Link
             key={index}
-            to={item.path}
-            className={`menu-item ${location.pathname === item.path ? 'active' : ''}`}
+            to={item.isAdminOnly && currentUser?.role !== 'admin' ? '#' : item.path}
+            className={`menu-item ${location.pathname === item.path ? 'active' : ''} ${item.isAdminOnly && currentUser?.role !== 'admin' ? 'disabled' : ''}`}
+            title={item.isAdminOnly && currentUser?.role !== 'admin' ? 'You are not an admin to access this page' : item.title}
+            onClick={(e) => {
+              if (item.isAdminOnly && currentUser?.role !== 'admin') {
+                e.preventDefault();
+              } else if (item.isAdminOnly) {
+                // For admin users, navigate via window.location to trigger external redirect
+                window.location.href = item.path;
+                e.preventDefault(); // Prevent react-router-dom navigation
+              }
+              setIsExpanded(false);
+            }}
           >
             <i className={`bi ${item.icon}`}></i>
             {isExpanded && <span>{item.title}</span>}

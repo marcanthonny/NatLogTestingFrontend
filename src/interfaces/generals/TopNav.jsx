@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../mechanisms/General/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 import '../css/TopNav.css';
 
 function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLogout }) {
@@ -10,6 +11,7 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const { currentUser } = useAuth(); // Get the current user
 
   // Add resize listener
   useEffect(() => {
@@ -153,11 +155,20 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
           </Link>
 
           <Link
-            to="https://batch-corr-form.vercel.app/"
-            className={`nav-link`}
-            onClick={() => setIsMenuOpen(false)}
+            to={`/api/auth/cross-login?token=${localStorage.getItem('authToken')}`}
+            className={`nav-link ${currentUser?.role !== 'admin' ? 'disabled' : ''}`}
+            title={currentUser?.role !== 'admin' ? 'You are not an admin to access this page' : ''}
+            onClick={(e) => {
+              if (currentUser?.role !== 'admin') {
+                e.preventDefault(); // Prevent navigation for non-admins
+              }
+              // For admin users, navigate via window.location to trigger external redirect
+              window.location.href = `/api/auth/cross-login?token=${localStorage.getItem('authToken')}`;
+              e.preventDefault(); // Prevent react-router-dom navigation
+              setIsMenuOpen(false);
+            }}
           >
-            Wrong Picking
+            Admin Wrong Picking
           </Link>
         </div>
 
