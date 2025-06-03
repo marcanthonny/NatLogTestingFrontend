@@ -228,7 +228,7 @@ const UserSettings = () => {
           </div>
 
           <div className="form-group">
-            <label>Current Password</label>
+            <label>Current Password (Required to Change your Password)</label>
             <input
               type="password"
               name="currentPassword"
@@ -239,7 +239,7 @@ const UserSettings = () => {
           </div>
 
           <div className="form-group">
-            <label>New Password</label>
+            <label>New Password (Leave blank if you don't want to change your password)</label>
             <input
               type="password"
               name="newPassword"
@@ -268,7 +268,7 @@ const UserSettings = () => {
           </div>
 
           <div className="form-group">
-            <label>Confirm New Password</label>
+            <label>Confirm New Password (Leave blank if you don't want to change your password)</label>
             <input
               type="password"
               name="confirmPassword"

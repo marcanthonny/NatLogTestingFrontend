@@ -34,7 +34,7 @@ const Sidebar = () => {
     },
     {
       title: 'Wrong Picking',
-      path: '/wrong-picking',
+      path: 'https://batch-corr-form.vercel.app/',
       icon: 'bi-file-text'
     },
     {

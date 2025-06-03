@@ -40,19 +40,19 @@ function UnifiedDashboard() {
         <div className="left-column">
           {/* Container for side-by-side upload and data view - Data View removed */}
           <div className="upload-and-data-container">
-            <div className="upload-section">
-              <EnhancedFileUpload
-                onIraUploadSuccess={handleIraUploadSuccess}
-                onCcUploadSuccess={handleCcUploadSuccess}
-                onLoading={handleLoading}
-                onError={handleError}
-                onSuccess={handleSuccess}
-                hasIraPowerBi={false}
-                hasCcPowerBi={false}
-              />
-            </div>
-            {/* Data View Section was here */}
+          <div className="upload-section">
+            <EnhancedFileUpload
+              onIraUploadSuccess={handleIraUploadSuccess}
+              onCcUploadSuccess={handleCcUploadSuccess}
+              onLoading={handleLoading}
+              onError={handleError}
+              onSuccess={handleSuccess}
+              hasIraPowerBi={false}
+              hasCcPowerBi={false}
+            />
           </div>
+            {/* Data View Section was here */}
+        </div>
 
           {/* Dashboard Section - moved from right column */}
           <div className="dashboard-section">

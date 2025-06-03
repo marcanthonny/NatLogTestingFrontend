@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../mechanisms/General/LanguageContext';
 import '../css/TopNav.css';
 
 function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLogout }) {
   const { translate } = useLanguage(); // Add this line to extract translate function
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -152,28 +153,24 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
           </Link>
 
           <Link
-            to="/form-summary"
-            className={`nav-link ${location.pathname === '/form-summary' ? 'active' : ''}`}
+            to="https://batch-corr-form.vercel.app/"
+            className={`nav-link`}
             onClick={() => setIsMenuOpen(false)}
           >
-            Form Summary
-          </Link>
-
-          <Link
-            to="/form-editor"
-            className={`nav-link ${location.pathname === '/form-editor' ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Form Editor
+            Wrong Picking
           </Link>
         </div>
 
         {/* Always visible user controls */}
         <div className="user-controls ms-auto">
           <Link
-            to="/settings"
+            to="/user-settings"
             className="user-menu-button"
-            onClick={() => setIsMenuOpen(false)}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/user-settings');
+              setIsMenuOpen(false);
+            }}
           >
             <i className="bi bi-person-circle"></i>
             {localStorage.getItem('username') || ' User'}

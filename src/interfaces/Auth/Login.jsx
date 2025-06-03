@@ -27,6 +27,7 @@ const Login = ({ onLogin }) => {
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('user', JSON.stringify(response.data.user));
         onLogin(response.data.token, response.data.user.role);
+        window.location.href = '/main'; // Redirect to main page after successful login
       } else {
         setError('Invalid response from server');
         setLoading(false);

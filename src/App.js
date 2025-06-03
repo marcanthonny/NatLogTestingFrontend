@@ -25,6 +25,7 @@ import UnifiedDashboard from './interfaces/UnifiedDashboard';
 import UserSettings from './interfaces/Auth/UserSettings';
 import Sidebar from './interfaces/generals/Sidebar';
 import Footer from './components/Footer';
+import HomeScreen from './interfaces/Home/HomeScreen';
 
 import { handleLogin, handleLogout } from './mechanisms/Handlers/AuthHandlers';
 import { createDataHandlers } from './mechanisms/Handlers/DataHandlers';
@@ -223,7 +224,8 @@ function App() {
           <Route path="/ira-cc" element={<UnifiedDashboard />} />
           <Route path="/analysis" element={<ComprehensiveDashboard />} />
           <Route path="/excel-editor" element={<ExcelEditor />} />
-          <Route path="/" element={<Navigate to="/ira-cc" replace />} />
+          <Route path="/main" element={<HomeScreen />} />
+          <Route path="/" element={<Navigate to="/main" replace />} />
         </Routes>
         <Footer />
       </div>
