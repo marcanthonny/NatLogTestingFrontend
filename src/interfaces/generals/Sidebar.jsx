@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import './Sidebar.css';
@@ -6,7 +6,11 @@ import './Sidebar.css';
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const location = useLocation();
-  const { currentUser } = useAuth();
+  const { currentUser, refreshUser } = useAuth();
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
 
   const menuItems = [
     {
@@ -35,8 +39,8 @@ const Sidebar = () => {
       icon: 'bi-clipboard-check'
     },
     {
-      title: 'Admin Wrong Picking',
-      path: `/api/auth/cross-login?token=${localStorage.getItem('authToken')}`,
+      title: 'Wrong Picking (Admin)',
+      path: 'https://batch-corr-form.vercel.app/admin',
       icon: 'bi-file-text',
       isAdminOnly: true
     },
@@ -46,6 +50,11 @@ const Sidebar = () => {
       icon: 'bi-pencil-square'
     }
   ];
+
+  // Get user role from localStorage
+  const storedUser = localStorage.getItem('user');
+  const userRole = storedUser ? JSON.parse(storedUser).role : null;
+  const isAdmin = userRole === 'admin';
 
   return (
     <div className={`sidebar d-none d-md-block ${isExpanded ? 'expanded' : 'collapsed'}`}>
@@ -60,22 +69,27 @@ const Sidebar = () => {
         {menuItems.map((item, index) => (
           <Link
             key={index}
-            to={item.isAdminOnly && currentUser?.role !== 'admin' ? '#' : item.path}
-            className={`menu-item ${location.pathname === item.path ? 'active' : ''} ${item.isAdminOnly && currentUser?.role !== 'admin' ? 'disabled' : ''}`}
-            title={item.isAdminOnly && currentUser?.role !== 'admin' ? 'You are not an admin to access this page' : item.title}
+            to={item.path}
+            className={`menu-item ${location.pathname === item.path ? 'active' : ''} ${item.isAdminOnly && !isAdmin ? 'disabled' : ''}`}
+            title={item.isAdminOnly && !isAdmin ? 'You are not an admin to access this page' : item.title}
             onClick={(e) => {
-              if (item.isAdminOnly && currentUser?.role !== 'admin') {
+              if (item.isAdminOnly && !isAdmin) {
                 e.preventDefault();
-              } else if (item.isAdminOnly) {
-                // For admin users, navigate via window.location to trigger external redirect
-                window.location.href = item.path;
-                e.preventDefault(); // Prevent react-router-dom navigation
+              } else if (item.isAdminOnly && isAdmin) {
+                // Get the auth token and redirect with crossToken parameter
+                const token = localStorage.getItem('authToken');
+                window.location.href = `${item.path}?crossToken=${token}`;
+                e.preventDefault();
               }
-              setIsExpanded(false);
             }}
           >
             <i className={`bi ${item.icon}`}></i>
-            {isExpanded && <span>{item.title}</span>}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {isExpanded && <span>{item.title}</span>}
+              {!isAdmin && item.isAdminOnly && (
+                <span className="admin-warning">You are not an admin</span>
+              )}
+            </div>
           </Link>
         ))}
       </div>

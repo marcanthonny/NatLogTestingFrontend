@@ -11,7 +11,16 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const { currentUser } = useAuth(); // Get the current user
+  const { currentUser, refreshUser } = useAuth(); // Get the current user and refresh function
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
+  // Get user role from localStorage
+  const storedUser = localStorage.getItem('user');
+  const userRole = storedUser ? JSON.parse(storedUser).role : null;
+  const isAdmin = userRole === 'admin';
 
   // Add resize listener
   useEffect(() => {
@@ -154,22 +163,32 @@ function TopNav({ activeTab, setActiveTab, hasData, hasIraData, hasCcData, onLog
             5S Scoring Tools
           </Link>
 
-          <Link
-            to={`/api/auth/cross-login?token=${localStorage.getItem('authToken')}`}
-            className={`nav-link ${currentUser?.role !== 'admin' ? 'disabled' : ''}`}
-            title={currentUser?.role !== 'admin' ? 'You are not an admin to access this page' : ''}
-            onClick={(e) => {
-              if (currentUser?.role !== 'admin') {
-                e.preventDefault(); // Prevent navigation for non-admins
-              }
-              // For admin users, navigate via window.location to trigger external redirect
-              window.location.href = `/api/auth/cross-login?token=${localStorage.getItem('authToken')}`;
-              e.preventDefault(); // Prevent react-router-dom navigation
-              setIsMenuOpen(false);
-            }}
-          >
-            Admin Wrong Picking
-          </Link>
+          <div className="nav-link">
+            {/* Wrap link and warning in a new div for layout control */}
+            <div className="admin-link-container">
+              <Link
+                to="https://batch-corr-form.vercel.app/admin"
+                className={`nav-link-item ${!isAdmin ? 'disabled-link' : ''}`}
+                title={!isAdmin ? 'You are not an admin to access this page' : ''}
+                onClick={(e) => {
+                  if (!isAdmin) {
+                    e.preventDefault();
+                  } else {
+                    // Get the auth token and redirect with crossToken parameter
+                    const token = localStorage.getItem('authToken');
+                    window.location.href = `https://batch-corr-form.vercel.app/admin?crossToken=${token}`;
+                    e.preventDefault();
+                  }
+                  setIsMenuOpen(false);
+                }}
+              >
+                Admin Wrong Picking
+              </Link>
+              {!isAdmin && (
+                <span className="admin-warning-topnav">You are not an admin</span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Always visible user controls */}

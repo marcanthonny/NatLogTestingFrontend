@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from '../utils/axiosConfig';
+import { getApiUrl } from '../config/api';
 
 const AuthContext = createContext({
   user: null,
@@ -7,38 +8,44 @@ const AuthContext = createContext({
   login: () => {},
   logout: () => {},
   updateUserSettings: () => {},
-  refreshUser: () => {} // Add this
+  refreshUser: () => {}
 });
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserData = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log('Fetching user data...');
+      const response = await axios.get(getApiUrl('auth/me'));
+      console.log('User data response:', response.data);
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      console.error('Failed to load user:', error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch user data on mount and every 30 seconds
   useEffect(() => {
-    const loadUser = async () => {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get('/api/auth/me');  // Add /api prefix
-        setUser(response.data);
-      } catch (error) {
-        console.error('Failed to load user:', error);
-        logout();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUser();
+    fetchUserData();
+    const interval = setInterval(fetchUserData, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const login = async (credentials) => {
     try {
-      const response = await axios.post('/api/auth/login', credentials);
+      const response = await axios.post(getApiUrl('auth/login'), credentials);
       const { token, user } = response.data;
       localStorage.setItem('authToken', token);
       localStorage.setItem('isAuthenticated', 'true');
@@ -59,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateUserSettings = async (settings) => {
     try {
-      const response = await axios.put('/users/settings', settings);
+      const response = await axios.put(getApiUrl('users/settings'), settings);
       const updatedUser = response.data.user;
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -72,7 +79,9 @@ export const AuthProvider = ({ children }) => {
 
   const refreshUser = async () => {
     try {
-      const response = await axios.get('/api/auth/me'); // Add /api prefix
+      console.log('Refreshing user data...');
+      const response = await axios.get(getApiUrl('auth/me'));
+      console.log('Refresh user data response:', response.data);
       setUser(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
       return response.data;
@@ -89,7 +98,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUserSettings,
     setUser,
-    refreshUser // Add this
+    refreshUser
   };
 
   return (

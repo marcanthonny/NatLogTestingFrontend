@@ -63,6 +63,17 @@
   font-size: 1.1rem;
 }
 
+.menu-item.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.admin-warning {
+  color: red;
+  font-size: 0.7em;
+  margin-top: 2px;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     display: none;

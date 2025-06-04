@@ -105,6 +105,39 @@
   color: #333;
 }
 
+/* Styles for Admin Wrong Picking menu item */
+.nav-item-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem; /* Match padding of other nav links */
+}
+
+.nav-link-item {
+  text-decoration: none;
+  color: inherit; /* Inherit color from parent or default link color */
+}
+
+.disabled-link {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.admin-warning-topnav {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 2px;
+}
+
+.admin-nav-item {
+  display: flex;
+  flex-direction: column;
+  /* Remove padding here as it's on the link now */
+}
+
+.admin-nav-item .nav-link-content {
+  padding: 0.75rem 1rem; /* Apply padding directly to the link */
+}
+
 /* Mobile styles */
 @media (max-width: 768px) {
   .top-nav {
@@ -316,4 +349,11 @@
 .logo-fallback {
   color: #000;
   padding: 0 10px;
+}
+
+/* Styling for the admin link and warning */
+.admin-link-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align items to the start (left) of the container */
 }
