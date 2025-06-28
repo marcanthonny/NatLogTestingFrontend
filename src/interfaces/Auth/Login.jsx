@@ -54,7 +54,7 @@ const Login = ({ onLogin }) => {
             onError={handleImageError}
           />
         </div>
-        <h3>Login to Continue</h3>
+        <title>Login to Continue</title>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Username</label>

@@ -20,17 +20,17 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #f8f9fa;
-  background-image: radial-gradient(#000000 1px, transparent 1px);
+  background-color: #000000;
+  background-image: radial-gradient(#3a3a3a 1px, transparent 1px);
   background-size: 20px 20px;
   background-position: -19px -19px;
 }
 
 .login-box {
-    background: white;
+    background: rgb(0, 0, 0);
     padding: 2rem;
     border-radius: 8px;
-    border: 2px solid #000000;
+    border: 2px solid #ffffff;
     width: 100%;
     max-width: 400px;
   }
@@ -48,7 +48,7 @@
   .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #495057;
+    color: #ffffff;
   }
   
   .form-control {
@@ -59,19 +59,19 @@
   }
   
   .form-control:focus {
-    border-color: #000000;
+    border-color: #ffffff;
     outline: 0;
-    border: 1px solid #000000;
+    border: 1px solid #ffffff;
   }
   
   .btn-primary {
-    background-color: #000000;
+    background-color: #ffffff;
     border-color: #000000;
     margin-top: 1rem;
   }
   
   .btn-primary:hover {
-    background-color: #000000;
+    background-color: #ffffff;
     border-color: #000000;
   }
   
